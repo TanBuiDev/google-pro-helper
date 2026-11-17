@@ -39,7 +39,7 @@ class FrontendStabilityTests(unittest.TestCase):
         self.page.set_default_timeout(5000)
         self.errors = []
         self.page.on("pageerror", lambda error: self.errors.append(str(error)))
-        self.state = {"accounts": [account("first"), account("second")], "logs": ["系统已就绪"], "active_count": 0, "card": {}}
+        self.state = {"accounts": [account("first"), account("second")], "logs": ["Hệ thống đã sẵn sàng"], "active_count": 0, "card": {}}
         self.hold_requests = False
         self.held_routes = []
         self.page.route("**/*", self.handle_request)
@@ -107,7 +107,7 @@ class FrontendStabilityTests(unittest.TestCase):
           for (let index = 0; index < 40; index++) {
             renderAccounts([
               { id: 'first', email: 'first@example.invalid', password: 'test-only', status: 'pending' },
-              { id: 'second', email: 'second@example.invalid', password: 'test-only', status: 'running', step_message: `更新 ${index}` },
+              { id: 'second', email: 'second@example.invalid', password: 'test-only', status: 'running', step_message: `Cập nhật ${index}` },
             ]);
           }
         }""")
@@ -141,10 +141,10 @@ class FrontendStabilityTests(unittest.TestCase):
         self.assertEqual(first.locator("select").input_value(), "5")
 
     def test_log_styles_escaping_and_scroll_behavior_unchanged(self):
-        self.state["logs"] = [f"日志行 {index}" for index in range(100)]
+        self.state["logs"] = [f"Dòng nhật ký {index}" for index in range(100)]
         self.refresh()
         self.page.evaluate("document.querySelector('#logTerminal').scrollTop = 0")
-        self.state["logs"].extend(["⚠️ 等待验证", "❌ 异常", "✅ 完成", "<script>window.logInjected = true</script>"])
+        self.state["logs"].extend(["⚠️ Đang chờ xác minh", "❌ Có lỗi", "✅ Hoàn tất", "<script>window.logInjected = true</script>"])
         self.refresh()
         self.assertEqual(self.page.locator(".log-warn").count(), 1)
         self.assertEqual(self.page.locator(".log-err").count(), 1)
@@ -152,7 +152,7 @@ class FrontendStabilityTests(unittest.TestCase):
         self.assertEqual(self.page.locator("#logTerminal").evaluate("el => el.scrollTop"), 0)
         self.assertFalse(self.page.evaluate("Boolean(window.logInjected)"))
         self.page.evaluate("document.querySelector('#logTerminal').scrollTop = 99999")
-        self.state["logs"].append("新日志")
+        self.state["logs"].append("Nhật ký mới")
         self.refresh()
         self.assertTrue(self.page.locator("#logTerminal").evaluate("el => el.scrollHeight - el.clientHeight <= el.scrollTop + 1"))
         self.state["logs"] = []

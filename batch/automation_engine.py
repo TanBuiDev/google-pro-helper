@@ -731,7 +731,7 @@ class GoogleUltraAutomator:
             if await totp.count() > 0 and await totp.first.is_visible():
                 code = await self.ensure_totp_fresh()
                 if code:
-                    self.log(f"Đang điền mã xác minh 2FA: {code}")
+                    self.log("Đang điền mã xác minh 2FA (không ghi mã vào nhật ký)")
                     try:
                         await totp.first.fill(code)
                         next_btn = page_obj.locator('#totpNext, button:has-text("下一步"), button:has-text("Next")').first
@@ -1221,7 +1221,7 @@ class GoogleUltraAutomator:
             try:
                 btxt = (await b.inner_text()).strip()
                 if btxt in ("订阅", "Subscribe"):
-                    self.log(f"--> Đang chọn [{step_tag}] - nút 【{btxt}】按钮...")
+                    self.log(f"--> Đang chọn [{step_tag}] - nút 【{btxt}】...")
                     try:
                         await b.scroll_into_view_if_needed(timeout=3000)
                         await b.click(timeout=5000)
@@ -1308,7 +1308,7 @@ class GoogleUltraAutomator:
                         if await totp_inp.count() > 0 and await totp_inp.first.is_visible():
                             code = await self.ensure_totp_fresh()
                             if code:
-                                self.log(f"Phát hiện hộp thoại 2FA; đang nhập mã xác minh: {code}")
+                                self.log("Phát hiện hộp thoại 2FA; đang nhập mã xác minh (không ghi mã vào nhật ký)")
                                 await totp_inp.first.fill(code)
                                 await page.keyboard.press("Enter")
                                 await asyncio.sleep(3)
@@ -1319,7 +1319,7 @@ class GoogleUltraAutomator:
                         if await cvc_inp.count() == 0 and ("CVC" in f2_txt or "安全码" in f2_txt or "security code" in f2_txt.lower()):
                             cvc_inp = f2.locator('input[type="tel"], input[type="password"]')
                         if await cvc_inp.count() > 0 and await cvc_inp.first.is_visible():
-                            self.log(f"Phát hiện hộp thoại xác minh CVC; đang điền mã bảo mật: {cvc_code}")
+                            self.log("Phát hiện hộp thoại xác minh CVC; đang điền mã bảo mật (không ghi CVC vào nhật ký)")
                             await cvc_inp.first.fill(cvc_code)
                             await asyncio.sleep(0.5)
                             vbtns = f2.locator(
@@ -1454,7 +1454,7 @@ class GoogleUltraAutomator:
         return False
 
     async def step2_layer1_12m(self, page):
-        self.update_state(status="running", current_step=2, step_message="Step 2/5: Đang xử lý giai đoạn đầu 12 tháng (US$0.00 -> 2027年10月)...")
+        self.update_state(status="running", current_step=2, step_message="Step 2/5: Đang xử lý giai đoạn đầu 12 tháng (US$0.00 -> tháng 10/2027)...")
         self.log("=== Step 2/5: Xử lý giai đoạn 12 tháng và dùng thử YouTube 1 tháng (US$0.00 0 USD) ===")
 
         play_txt = await self.inspect_play_subscriptions(page)
@@ -1493,14 +1493,14 @@ class GoogleUltraAutomator:
         await asyncio.sleep(45)
 
     async def step3_layer2_6mss(self, page):
-        self.update_state(status="running", current_step=3, step_message="Step 3/5: Đang xử lý giai đoạn hai 6 tháng (US$0.00 -> 18个月 / 2028年4月)...")
+        self.update_state(status="running", current_step=3, step_message="Step 3/5: Đang xử lý giai đoạn hai 6 tháng (US$0.00 -> 18 tháng / tháng 4/2028)...")
         self.log("=== Step 3/5: Xử lý giai đoạn hai 6 tháng (S25 Pro 6M + YT 1M dùng thử, US$0.00) cộng dồn thời hạn ===")
 
         play_txt = await self.inspect_play_subscriptions(page)
         if any(k in play_txt for k in ("2028年4月", "2028年5月", "2028年6月", "2028年10月", "2028年11月", "2028年12月", "Apr 2028", "May 2028", "Oct 2028", "Nov 2028", "Dec 2028")):
             if "重新订阅" in play_txt and not any(k in play_txt for k in ("2028年10月", "2028年11月", "2028年12月", "Oct 2028", "Nov 2028", "Dec 2028")):
                 await self.ensure_subscription_active(page)
-            self.log("✅ Tài khoản đã có thời hạn đến năm 2028 (≥18个月); bỏ qua Step 3！")
+            self.log("✅ Tài khoản đã có thời hạn đến năm 2028 (≥18 tháng); bỏ qua Step 3！")
             return
 
         if "重新订阅" in play_txt:
@@ -1523,16 +1523,16 @@ class GoogleUltraAutomator:
             ok = await self.open_and_click_subscribe(page, cfg_l2, "step3_layer2_6mss")
         if not ok:
             raise RuntimeError(f"Step 3 (giai đoạn hai 6 tháng US$0.00) không thành công: {self.last_subscribe_error}")
-        self.log("✅ Step 3 (giai đoạn hai 6 tháng US$0.00 -> 18个月) đã cộng dồn; chờ 45 giây để đồng bộ mã thuê bao...")
+        self.log("✅ Step 3 (giai đoạn hai 6 tháng US$0.00 -> 18 tháng) đã cộng dồn; chờ 45 giây để đồng bộ mã thuê bao...")
         await asyncio.sleep(45)
 
     async def step4_layer3_6m(self, page):
-        self.update_state(status="running", current_step=4, step_message="Step 4/5: Đang xử lý giai đoạn cuối 6 tháng (US$0.00 -> 24个月 / 2028年10月)...")
-        self.log("=== Step 4/5: Xử lý giai đoạn cuối 6 tháng (Pixel 6M + YT 1M dùng thử, US$0.00 -> 24个月) ===")
+        self.update_state(status="running", current_step=4, step_message="Step 4/5: Đang xử lý giai đoạn cuối 6 tháng (US$0.00 -> 24 tháng / tháng 10/2028)...")
+        self.log("=== Step 4/5: Xử lý giai đoạn cuối 6 tháng (Pixel 6M + YT 1M dùng thử, US$0.00 -> 24 tháng) ===")
 
         play_txt = await self.inspect_play_subscriptions(page)
         if any(k in play_txt for k in ("2028年10月", "2028年11月", "2028年12月", "Oct 2028", "Nov 2028", "Dec 2028")):
-            self.log("✅ Tài khoản đã có thời hạn 24 tháng (2028年10-12月); bỏ qua Step 4！")
+            self.log("✅ Tài khoản đã có thời hạn 24 tháng (tháng 10–12/2028); bỏ qua Step 4！")
             return
 
         if "重新订阅" in play_txt:
@@ -1558,7 +1558,7 @@ class GoogleUltraAutomator:
         if not ok:
             raise RuntimeError(f"Step 4 (giai đoạn cuối 6 tháng US$0.00) không thành công: {self.last_subscribe_error}")
 
-        self.log("✅ Step 4 (giai đoạn cuối 6 tháng US$0.00 -> 24个月tối đa) đã cộng dồn; chờ 40 giây để đồng bộ ngày hết hạn...")
+        self.log("✅ Step 4 (giai đoạn cuối 6 tháng US$0.00 -> tối đa 24 tháng) đã cộng dồn; chờ 40 giây để đồng bộ ngày hết hạn...")
         await asyncio.sleep(40)
         play_after = await self.inspect_play_subscriptions(page)
         if "2028" not in play_after:
