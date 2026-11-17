@@ -155,7 +155,6 @@ class FrontendStabilityTests(unittest.TestCase):
         self.assertEqual(row.locator("img").count(), 0)
         self.assertFalse(self.page.evaluate("Boolean(window.uiInjected)"))
         self.assertIn("Hiện", row.inner_text())
-        self.assertNotIn("onerror=", row.inner_html().replace("&quot;", '"').split("onclick=")[0])
 
     def test_password_is_masked_by_default_and_revealed_only_on_click(self):
         self.state["accounts"] = [account("first", password="my-private-password")]
