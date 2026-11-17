@@ -51,7 +51,7 @@ class ExtensionAuditTests(unittest.TestCase):
         self.root = Path(self.tmp.name)
         ext = self.root / "extension"
         ext.mkdir()
-        for name in ("manifest.json", "popup.html", *extension.EXPECTED_SCRIPTS):
+        for name in ("manifest.json", "popup.html", "popup.js", *extension.EXPECTED_SCRIPTS):
             shutil.copyfile(ROOT / "extension" / name, ext / name)
 
     def test_current_extension_passes_passive_checks(self):
