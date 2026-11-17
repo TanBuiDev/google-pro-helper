@@ -1,42 +1,39 @@
 # Google Pro Helper
 
-本仓库收录两个独立版本：浏览器扩展版与批量版，分别保留各自的目录结构和原有代码。
+Repository này bao gồm hai phiên bản độc lập: **tiện ích mở rộng trình duyệt (Chrome Extension)** và **phiên bản xử lý hàng loạt (Batch)**. Mỗi phiên bản được giữ nguyên cấu trúc thư mục và mã nguồn ban đầu.
 
-| 版本 | 目录 | 简介 |
+| Phiên bản | Thư mục | Mô tả |
 | --- | --- | --- |
-| 浏览器扩展版 | [extension](./extension/) | 在浏览器中使用的扩展项目，包含扩展清单、弹窗页面、脚本与图标。 |
-| 批量版 | [batch](./batch/) | 用于批量账号任务管理的本地控制台项目，包含网页界面、后端、启动脚本与测试。 |
+| Tiện ích mở rộng trình duyệt | [extension](./extension/) | Tiện ích sử dụng trong trình duyệt, bao gồm tệp manifest, cửa sổ popup, các script và biểu tượng. |
+| Phiên bản hàng loạt | [batch](./batch/) | Công cụ quản lý tác vụ cho nhiều tài khoản qua bảng điều khiển chạy cục bộ, gồm giao diện web, backend, script khởi chạy và kiểm thử. |
 
-## 目录结构
+## Cấu trúc thư mục
 
 ```text
 google-pro-helper/
-├── extension/   # 浏览器扩展版
-├── batch/       # 批量版
+├── extension/   # Tiện ích mở rộng trình duyệt
+├── batch/       # Phiên bản xử lý hàng loạt
 ├── .gitignore
 └── README.md
 ```
 
-## 浏览器扩展版
+## Tiện ích mở rộng trình duyệt
 
-
-Linuxdo原帖在此:
+Bài đăng gốc trên Linux.do:
 
 [https://linux.do/t/topic/3123997](https://linux.do/t/topic/3123997)
 
+(💰 Kích hoạt Google AI Pro miễn phí 12 / 24 tháng | chèn `offer token`)
 
-（💰 免费激活 Google AI Pro 12 / 24 个月」| offer token 注入）
+(Phần lớn tài khoản của tôi được tạo hàng loạt bằng công cụ đăng ký tự động; nguyên lý đều giống nhau. Tổng cộng tôi đã làm bảy tài khoản, đến nay đều hoạt động được hơn nửa tháng. Tuy nhiên, với việc có quá nhiều người tận dụng ưu đãi theo cách này, tôi đoán cách làm này sẽ không tồn tại được lâu.)
 
+> **Lưu ý: Không sử dụng tài khoản Google chính!!!!**
 
-（我本人大部分号是用的是注册机批量搞的，原理都一样，总共整了七个目前都活过了半个月，不过被这么大批量薅，估计也活不久了）
-
-> **在此提示，不要用大号！！！！**
-
-### **1.在chrome浏览器上点击"加载未打包的拓展程序"，注意打开开发者模式**
+### **1. Trong Chrome, chọn “Load unpacked” (Tải tiện ích đã giải nén); nhớ bật Developer mode (Chế độ dành cho nhà phát triển)**
 
 ![image](https://i0.hdslb.com/bfs/new_dyn/f6ecc1314583543aedb82bf0d950213e3747579686817540.png@1192w.webp)
 
-### **2.然后打开 one.google.com/plans，按照拓展里步骤，先开12月的，注意正上方的绿色提示，和右下角的提示**
+### **2. Mở `one.google.com/plans` và làm theo các bước trong tiện ích; kích hoạt gói 12 tháng trước, đồng thời chú ý thông báo màu xanh phía trên và thông báo ở góc dưới bên phải**
 
 ![image](https://i0.hdslb.com/bfs/new_dyn/5de4698ae0cd2a371a1ecb3e6727a8823747579686817540.png@1130w_1760h.webp)
 
@@ -44,99 +41,109 @@ Linuxdo原帖在此:
 
 ![image](https://i0.hdslb.com/bfs/new_dyn/2544ad49e1db82fb90999fe3355e6fbd3747579686817540.png@92h.webp)
 
-### **3.然后选择pro套餐，进行绑卡（需要卡里有至少1u验证，u卡基本都行，测试卡：starryblu/maya/bybit/mexc/招行master/中行2233master/bitEU/wise/savo卡全都可以）付款前一定要看清，第一个步骤首月必定是0元的**
+### **3. Chọn gói Pro và liên kết thẻ thanh toán**
 
-> PS：这里需要说明如果是已经给了折扣的情况，如下图，付款时有极大概率需要付款首月的youtube会员，小心别被反薅，正常显示的都是在下个月才收费
+(Tài khoản thẻ cần có ít nhất 1 USD để xác minh. Theo tác giả, về cơ bản các loại thẻ USD đều dùng được. Những thẻ đã thử: starryblu/maya/bybit/mexc/Mastercard của China Merchants Bank/Mastercard 2233 của Bank of China/bitEU/wise/savo.)
+
+**Trước khi thanh toán phải kiểm tra thật kỹ: theo hướng dẫn gốc, ở bước đầu tiên số tiền của tháng đầu phải là 0.**
+
+> **P.S.** Nếu tài khoản đã được áp dụng ưu đãi giảm giá như hình dưới, khi thanh toán có khả năng rất cao sẽ phải trả tiền YouTube Premium của tháng đầu. Cẩn thận tránh bị trừ tiền ngoài ý muốn. Trường hợp bình thường sẽ hiển thị bắt đầu thu phí từ tháng sau.
 
 ![image](https://i0.hdslb.com/bfs/new_dyn/b24d7dc8773238dce8883de6ac8fb5a13747579686817540.png@1192w.webp)
 
 ![image](https://i0.hdslb.com/bfs/new_dyn/9b5d510ce927dc364d468eb82cc7182e3747579686817540.png@1046w_1590h.webp)
 
-### **4.然后如果不再出订购页面的话，不要着急，也不要取消订阅（其实取消了也无所谓）。**
+### **4. Nếu trang đăng ký gói không xuất hiện nữa, đừng vội lo lắng và cũng đừng hủy đăng ký (thực ra nếu đã hủy cũng không sao)**
 
-先把拓展切换到六个月，再重新进入页面，接着点击切换到年付
+Trước tiên, chuyển tiện ích sang tùy chọn 6 tháng, sau đó vào lại trang và chọn chuyển sang thanh toán theo năm.
 
-就会再次出现订购页面，这里会出现2028.5.5付款（示例日期），不要担心，这个其实还是免费的，到2028.5.5才会付款；同样的方法再次操作，切换下一个6个月，就能实现2年pro会员了
+Trang đăng ký sẽ xuất hiện trở lại. Tại đây có thể hiển thị ngày thanh toán là `2028.5.5` (chỉ là ngày ví dụ). Theo tác giả, điều này có nghĩa là chưa phải trả phí ngay, mà đến ngày `2028.5.5` mới phải thanh toán.
+
+Làm tương tự một lần nữa, chuyển sang gói 6 tháng tiếp theo, để đạt tổng thời hạn Google AI Pro 2 năm như hướng dẫn gốc.
 
 ![image](https://i0.hdslb.com/bfs/new_dyn/59a750f80e575523398a3cee77f0ae343747579686817540.png@1192w.webp)
 
-> ps：
+> **P.S.**
 >
-> 最后一定注意取消订阅，不要被反薅，因为附带有一个每月的youtube会员需要付费，不取消的话下个月就会被反薅
+> Cuối cùng, nhất định phải chú ý hủy đăng ký để tránh bị tính phí ngoài ý muốn. Vì gói còn đi kèm YouTube Premium tính phí hằng tháng, nếu không hủy thì tháng sau có thể bị trừ tiền.
 
 ![image](https://i0.hdslb.com/bfs/new_dyn/c65340f450d8c110abd88de7f0faa99c3747579686817540.png@1192w.webp)
 
-**L站佬友补充：**
+**Thông tin bổ sung từ thành viên cộng đồng LINUX DO:**
 
-> Fy6666:
+> **Fy6666:**
 >
-> YouTube Premium Individual Add On无法使用。您可以单独订阅此套装中的其他商品。提示这样子怎么办呢？查了，是YouTube那个会员资格只有美国、加拿大、巴西、法国、德国、日本哦，这6个国家可以
+> “Không thể sử dụng YouTube Premium Individual Add On. Bạn có thể đăng ký riêng các sản phẩm khác trong gói này.” Nếu gặp thông báo như vậy thì phải làm sao? Sau khi tìm hiểu, tôi thấy quyền lợi YouTube Premium này chỉ khả dụng tại sáu quốc gia: Mỹ, Canada, Brazil, Pháp, Đức và Nhật Bản.
 
-> aikavvak12una:
+> **aikavvak12una:**
 >
-> 账号地区不对可以直接先添加美国的付款方式就再订阅就行了
+> Nếu khu vực tài khoản không đúng, có thể thêm phương thức thanh toán tại Mỹ trước, rồi đăng ký lại.
 >
-> 我的一个小号条款地区甚至是中国 🤣
+> Thậm chí có một tài khoản phụ của tôi có khu vực trong điều khoản là Trung Quốc 🤣
 
-更改play商店支付方式即可，和谷歌账号属地无关
+Theo ý kiến bổ sung trong bài gốc: chỉ cần thay đổi phương thức thanh toán trên cửa hàng Google Play, không liên quan đến quốc gia của tài khoản Google.
 
+## Phiên bản xử lý hàng loạt
 
-## 批量版
+**Bảng điều khiển tự động hóa Google AI Pro (5 TB) với mục tiêu 2 năm không mất phí (US$0.00 → 24 tháng)**
 
-**Google AI Pro (5 TB) 零成本两年 (US$0.00 -> 24个月) 全自动控制台**
+> “Hai năm không mất phí” nêu trên là **mục tiêu của dự án**, không có nghĩa kết quả đăng ký đã được xác minh. Tuyên bố “không bị trừ tiền trong toàn bộ quá trình” của hướng dẫn gốc **không phải sự bảo đảm**. Chi phí và quyền lợi thực tế phụ thuộc vào trang thanh toán và kết quả từ hệ thống cung cấp dịch vụ.
 
-> 以上述“零成本两年”为项目目标，不代表已验证的订阅结果。原说明中的“全程 0 扣费”不能作为保证，实际费用和权益以结账页面及上游结果为准。
+### I. Yêu cầu môi trường
 
-### 一、运行环境要求
-1. Windows 10 / 11 系统
-2. 已安装 Google Chrome 浏览器（默认路径即可）
-3. 已安装 Python 3.10 或更高版本（安装时勾选 Add Python to PATH）
-4. 网络环境：本机开启美区（US）代理，或在控制台左侧填写代理模板
+1. Hệ điều hành Windows 10 / 11.
+2. Đã cài đặt Google Chrome (có thể dùng đường dẫn cài đặt mặc định).
+3. Đã cài đặt Python 3.10 trở lên (khi cài đặt, chọn **Add Python to PATH**).
+4. Môi trường mạng: cấu hình proxy khu vực Mỹ (US) trên máy, hoặc nhập mẫu proxy ở bên trái bảng điều khiển.
 
-### 二、快速启动步骤
-1. 首次使用请双击运行：【1_首次运行_安装依赖并启动.bat】
-2. 之后日常使用直接双击：【2_启动控制台.bat】
-3. 浏览器会自动打开控制台页面：http://127.0.0.1:8765
+### II. Khởi chạy nhanh
 
-### 三、自定义填写支付卡 & 跑号说明
-#### 1. 填写支付卡（必填）：
-   - 在网页左侧【全局配置与内联免税绑卡】区域，填入你自己的 Visa 或 Mastercard 外币卡：
-     * 卡号（16位数字）
-     * 有效期（月 / 年，如 08 / 29）
-     * 安全码（3位 CVC）
-     * 持卡人英文姓名
-     * 免税邮编默认已填好 97201（美国俄勒冈免税州），无需修改
-   - 填写后点击【💾 保存配置】。
-   - 注：脚本内置严格 0 元消费保护，仅在结账弹窗确认为 US$0.00 时才会点击订阅，全程 0 扣费。
+1. Lần đầu sử dụng, nhấp đúp vào `1_首次运行_安装依赖并启动.bat` (cài đặt thư viện phụ thuộc và khởi chạy).
+2. Những lần sử dụng sau, nhấp đúp vào `2_启动控制台.bat` (khởi chạy bảng điều khiển).
+3. Trình duyệt sẽ tự động mở trang điều khiển tại: http://127.0.0.1:8765
 
-#### 2. 批量导入 Google 账号：
-   - 在网页右侧【批量放号导入区】粘贴账号（每行一个），支持以下任意格式：
-     * 邮箱----密码----辅助邮箱
-     * 邮箱----密码----辅助邮箱----2FA密钥
-     * 邮箱----密码----2FA密钥
-   - 点击【➕ 一键导入账号列表】。
+### III. Nhập thẻ thanh toán tùy chỉnh và hướng dẫn chạy tài khoản
 
-#### 3. 开始全自动执行：
-   - 点击单个账号右侧的【▶ 执行】或顶部的【▶ 批量全自动执行】。
-   - 脚本会自动完成：
-     - Step 1: 自动登录 Google 并通过辅助邮箱 / 2FA 验证
-     - Step 2: 内联免税绑卡 + 首层 12 个月免费包 (US$0.00)
-     - Step 3: 叠加二层 6 个月免费包 (US$0.00 -> 18个月)
-     - Step 4: 叠加三层 6 个月免费包 (US$0.00 -> 24个月封顶)
-     - Step 5: 自动前往 Google Play 取消自动续订，锁死 2 年到期权益并截图验真
+#### 1. Nhập thẻ thanh toán (bắt buộc)
 
-### 四、隔离与敏感数据
+- Trong khu vực **“Cấu hình toàn cục và liên kết thẻ trực tiếp với địa chỉ miễn thuế”** ở bên trái trang web, nhập thông tin thẻ Visa hoặc Mastercard hỗ trợ thanh toán ngoại tệ của bạn:
+  - Số thẻ (16 chữ số).
+  - Ngày hết hạn (tháng / năm, ví dụ `08 / 29`).
+  - Mã bảo mật (CVC gồm 3 chữ số).
+  - Họ tên chủ thẻ bằng tiếng Anh.
+  - Mã ZIP được điền sẵn là `97201` (Oregon, Mỹ, được hướng dẫn gốc mô tả là bang miễn thuế), không cần thay đổi.
+- Sau khi nhập, nhấn **“💾 Lưu cấu hình”**.
+- **Lưu ý trong hướng dẫn gốc:** Script được mô tả là có cơ chế bảo vệ nghiêm ngặt để chỉ nhấn đăng ký khi cửa sổ thanh toán xác nhận số tiền `US$0.00`, nhằm tránh bị trừ tiền trong quá trình thực hiện. Đây là mô tả của tác giả, không phải bảo đảm về chi phí thực tế.
 
-- 浏览器扩展版位于 `extension/`，批量版位于 `batch/`，两者分目录存放。批量版原启动脚本使用当前 Python 环境安装依赖，未提供独立虚拟环境，不能宣称依赖完全隔离。
-- 批量版按账号使用独立浏览器配置目录，但这不等于虚拟机或安全沙箱。
-- 账号密码、2FA 密钥、支付卡信息和浏览器登录数据属于敏感信息；本地配置、浏览器配置目录、截图、日志及缓存不应提交到仓库。
+#### 2. Nhập hàng loạt tài khoản Google
 
+- Trong khu vực **“Nhập danh sách tài khoản hàng loạt”** bên phải trang web, dán mỗi tài khoản trên một dòng, hỗ trợ các định dạng:
+  - `email----mật khẩu----email khôi phục`
+  - `email----mật khẩu----email khôi phục----khóa bí mật 2FA`
+  - `email----mật khẩu----khóa bí mật 2FA`
+- Nhấn **“➕ Nhập danh sách tài khoản”**.
 
-## 使用入口
+#### 3. Bắt đầu thực thi tự động
 
-- **浏览器扩展版**：打开 Chrome 扩展管理页，开启开发者模式，选择“加载已解压的扩展程序”，加载 `extension` 目录。
-- **批量版**：在 Windows 下进入 `batch` 目录，首次使用运行 `1_首次运行_安装依赖并启动.bat`，之后运行 `2_启动控制台.bat`。
+- Nhấn **“▶ Thực thi”** ở bên phải một tài khoản, hoặc **“▶ Thực thi tự động hàng loạt”** ở phía trên.
+- Theo mô tả của tác giả, script sẽ tự động thực hiện:
+  - **Bước 1:** Đăng nhập Google và xác minh qua email khôi phục / 2FA.
+  - **Bước 2:** Liên kết thẻ trực tiếp với địa chỉ miễn thuế và sử dụng gói miễn phí 12 tháng đầu (`US$0.00`).
+  - **Bước 3:** Cộng thêm lớp ưu đãi 6 tháng thứ hai (`US$0.00` → 18 tháng).
+  - **Bước 4:** Cộng thêm lớp ưu đãi 6 tháng thứ ba (`US$0.00` → tối đa 24 tháng).
+  - **Bước 5:** Tự động truy cập Google Play để hủy gia hạn, giữ quyền lợi đến hết hạn 2 năm theo mô tả và chụp ảnh màn hình để xác minh.
 
-两个版本独立使用。本次整理仅增加仓库分层和本页介绍，不修改项目源代码。
+### IV. Cách ly và dữ liệu nhạy cảm
 
-本地账号与支付配置（`config*.json`）、环境变量文件、缓存和运行数据不提交到仓库；批量版的配置请在本地填写。
+- Tiện ích trình duyệt nằm trong `extension/`; phiên bản hàng loạt nằm trong `batch/`. Hai phiên bản được lưu trong các thư mục riêng. Script khởi chạy gốc của phiên bản hàng loạt cài đặt các thư viện vào môi trường Python hiện tại, không tạo môi trường ảo riêng; vì vậy **không thể khẳng định các thư viện phụ thuộc được cách ly hoàn toàn**.
+- Phiên bản hàng loạt sử dụng thư mục cấu hình trình duyệt riêng cho từng tài khoản, nhưng điều đó **không tương đương máy ảo hoặc môi trường sandbox bảo mật**.
+- Mật khẩu tài khoản, khóa bí mật 2FA, thông tin thẻ thanh toán và dữ liệu đăng nhập trình duyệt đều là **thông tin nhạy cảm**. Không được commit cấu hình cục bộ, thư mục hồ sơ trình duyệt, ảnh chụp màn hình, nhật ký và bộ nhớ đệm lên repository.
+
+## Cách sử dụng
+
+- **Tiện ích mở rộng trình duyệt:** Mở trang quản lý tiện ích Chrome, bật chế độ nhà phát triển, chọn **“Load unpacked” (Tải tiện ích đã giải nén)** rồi chọn thư mục `extension`.
+- **Phiên bản hàng loạt:** Trên Windows, mở thư mục `batch`. Lần đầu chạy `1_首次运行_安装依赖并启动.bat`; những lần sau chạy `2_启动控制台.bat`.
+
+Hai phiên bản hoạt động độc lập. Đợt sắp xếp ban đầu chỉ bổ sung phân chia thư mục và phần giới thiệu trong README, **không thay đổi mã nguồn dự án**.
+
+Không commit cấu hình tài khoản và thanh toán cục bộ (`config*.json`), tệp biến môi trường, bộ nhớ đệm và dữ liệu phát sinh khi chạy lên repository. Cấu hình của phiên bản hàng loạt phải được nhập trên máy cục bộ.
