@@ -36,7 +36,7 @@ email----password----recovery_email----two_factor_secret
 email----password----two_factor_secret
 ```
 
-**Các trường chứa thông tin cực kỳ nhạy cảm.** Không đưa dữ liệu thật vào môi trường chưa được kiểm toán. Tránh lưu mật khẩu, khóa bí mật 2FA hoặc dữ liệu thẻ dưới dạng văn bản rõ.
+**Các trường chứa thông tin cực kỳ nhạy cảm.** Không đưa dữ liệu thật vào môi trường chưa được kiểm toán. Toàn bộ `config.json` sẽ được mã hóa bằng Windows DPAPI khi ứng dụng đọc cấu hình lần đầu. Không chia sẻ bản gốc chưa mã hóa.
 
 ## Bảo vệ cục bộ — Giai đoạn A
 
@@ -46,7 +46,7 @@ email----password----two_factor_secret
 - Thông báo và trạng thái được lọc để giảm nguy cơ lộ mật khẩu, khóa 2FA, mã xác minh, số thẻ và thông tin xác thực proxy.
 - Nếu cổng Chrome Debugging đã bị chương trình khác sử dụng, tác vụ sẽ báo lỗi thay vì tự đóng tiến trình đang chiếm cổng.
 
-**Giới hạn:** Mã phiên cục bộ chủ yếu ngăn truy cập chéo từ website khác, không thay thế cơ chế bảo vệ hệ điều hành trước mã độc chạy cùng máy. Thông tin tài khoản và thẻ vẫn được lưu trong `config.json` chưa mã hóa; việc mã hóa thuộc giai đoạn tiếp theo. Kiểm tra bảo mật không đồng nghĩa bảo đảm không phát sinh chi phí hoặc bảo đảm quyền lợi đăng ký.
+**Giới hạn:** Mã phiên cục bộ chủ yếu ngăn truy cập chéo từ website khác, không thay thế cơ chế bảo vệ hệ điều hành trước mã độc chạy cùng máy. Thông tin nhạy cảm vẫn được giải mã trong bộ nhớ khi chạy và vẫn có thể xuất hiện trong hồ sơ Chrome/ảnh chụp; DPAPI không bảo vệ trước mã độc đang chạy dưới cùng tài khoản Windows. Kiểm tra bảo mật không đồng nghĩa bảo đảm không phát sinh chi phí hoặc bảo đảm quyền lợi đăng ký.
 
 ### Chạy kiểm thử (không dùng tài khoản thật)
 
@@ -55,10 +55,39 @@ Từ thư mục `batch/`:
 ```powershell
 python -m unittest discover -s tests -p "test_security_controls.py"
 python -m unittest discover -s tests -p "test_config_storage.py"
+python -m unittest discover -s tests -p "test_maintenance.py"
 python -m unittest discover -s tests -p "test_frontend_stability.py"
 ```
 
 Bài kiểm thử giao diện cần Playwright và Chrome. Các kiểm thử trên **chưa thay thế** cho việc quan sát lưu lượng mạng trong môi trường ảo cách ly.
+
+## Bảo vệ dữ liệu — Giai đoạn B
+
+### Mã hóa cấu hình bằng Windows DPAPI
+
+- Mã hóa **toàn bộ** nội dung `batch/config.json` với phạm vi **CurrentUser** của Windows, bao gồm email, mật khẩu, khóa 2FA, thẻ, proxy, trường bổ sung và dữ liệu trạng thái.
+- File cấu hình dạng JSON cũ được **tự chuyển đổi khi đọc lần đầu**. Chương trình mã hóa xong mới tạo file tạm và thay thế nguyên tử; nếu DPAPI hoặc thao tác ghi thất bại, file ban đầu được giữ nguyên. Không cố tình tạo bản sao cấu hình cũ chưa mã hóa.
+- Python vẫn nhận cấu trúc `dict` như trước; các bước tự động hóa không cần sửa. **Không** sửa trực tiếp nội dung mã hóa bằng trình soạn thảo văn bản.
+- Không có cơ chế tự động lưu bản rõ khi DPAPI thất bại. Tính năng mã hóa chỉ hỗ trợ Windows.
+- **Quan trọng:** File chỉ có thể giải mã với hồ sơ/tài khoản Windows tương ứng. Chuyển file sang máy khác hoặc chạy ứng dụng dưới tài khoản Windows khác thường sẽ không giải mã được. Sao lưu mã hóa không thay thế sao lưu khóa/hồ sơ Windows. Đây không phải cơ chế đồng bộ đa máy.
+
+### Dọn ảnh chụp và sao lưu
+
+Từ thư mục `batch/`, chạy:
+
+```powershell
+python maintenance.py --days 30
+python maintenance.py --days 30 --apply
+python maintenance.py --backup-config
+```
+
+Lệnh đầu chỉ **xem trước** số ảnh có thể xóa; `--apply` mới thực hiện. Công cụ chỉ chọn ảnh PNG quá hạn không còn được tham chiếu trong cấu hình. Nó không đụng vào hồ sơ Chrome, ảnh đang được tham chiếu, hay file cấu hình. Lệnh `--backup-config` tạo bản sao `config.json.dpapi.bak` **đã mã hóa**, chỉ khi cấu hình có thể giải mã bằng tài khoản Windows hiện tại. Đóng ứng dụng trước khi khôi phục bản sao này về tên `config.json`. Nếu không đọc/giải mã được cấu hình, việc xóa phải dừng.
+
+Vì mã hóa không xóa dấu vết dữ liệu đã từng lưu trên đĩa hoặc trong các bản sao trước đây, hãy kiểm tra và xử lý bản sao cũ theo quy trình bảo mật Windows. Không đưa bất kỳ bản sao nào lên GitHub.
+
+### Thư viện phụ thuộc
+
+`requirements.txt` được cố định phiên bản **trực tiếp**, với phiên bản FastAPI phù hợp cho Python 3.10. Các thư viện phụ thuộc gián tiếp và bản dựng Windows vẫn cần được xác minh; các phiên bản này chưa được thử chạy toàn bộ trên máy Windows thực.
 
 ## Nguyên tắc bảo mật và dữ liệu
 
