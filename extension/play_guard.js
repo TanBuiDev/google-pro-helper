@@ -1,8 +1,6 @@
-/* Xi · Google AI Pro Offer Injector — 结账弹窗价格守卫
- * 作用：在 Play 结账 iframe 里读真实条款，绿条=免费试用可点，红条=要扣钱别点。
- */
+/* Google Pro Helper: checkout price indicator. Read page terms, but always verify the final amount manually. */
 (() => {
-  if (window.__GAPT_GUARD || window.top === window) return; // 只在子框架里跑
+  if (window.__GAPT_GUARD || window.top === window) return; // Run only inside child frames.
   window.__GAPT_GUARD = true;
 
   const FREE_WORDS = ["free trial", "start your free trial", "免费试用", "US$0.00", "$0.00", "0,00", "€0.00", "won't be charged", "不会向您收费", "不会收费"];
@@ -14,7 +12,7 @@
     if (!bar) {
       bar = document.createElement("div");
       bar.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:2147483647;padding:10px 14px;" +
-        "font:13px/1.5 -apple-system,Segoe UI,Roboto,'Microsoft YaHei',sans-serif;text-align:center;font-weight:600;";
+        "font:13px/1.5 -apple-system,Segoe UI,Roboto,'Segoe UI',sans-serif;text-align:center;font-weight:600;";
       document.body.appendChild(bar);
     }
     bar.style.background = kind === "ok" ? "#1a7f37" : (kind === "bad" ? "#c62828" : "#616161");
@@ -34,13 +32,13 @@
     const paid = PAID_WORDS.some((w) => t.includes(w.toLowerCase()));
 
     if (free && !paid) {
-      paint("ok", "✅ 检测到免费试用 —— 本弹窗可安全订阅（请自己再核对金额为 $0.00）");
+      paint("ok", "✅ Phát hiện thông tin dùng thử miễn phí. Hãy tự kiểm tra lại tổng tiền và điều khoản trước khi xác nhận.");
     } else if (paid && !free) {
-      paint("bad", "❌ 未检出免费试用，可能是真扣费 —— 先别点订阅，返回换层重试");
+      paint("bad", "❌ Không tìm thấy thông tin dùng thử miễn phí. Có thể phát sinh phí; không xác nhận thanh toán.");
     } else if (free && paid) {
-      paint("warn", "⚠️ 条款同时出现免费与付费字样 —— 请人工确认金额后再点");
+      paint("warn", "⚠️ Điều khoản có cả thông tin miễn phí và trả phí. Hãy kiểm tra thủ công trước khi tiếp tục.");
     } else {
-      paint("warn", "… 未识别到价格条款（可能在加载中）");
+      paint("warn", "… Chưa xác định được điều khoản giá (trang có thể đang tải).");
     }
   }
 

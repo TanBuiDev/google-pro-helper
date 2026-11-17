@@ -1,51 +1,50 @@
-# Google AI Pro (5 TB) — Bảng điều khiển tự động hóa với mục tiêu 2 năm không mất phí (US$0.00 → 24 tháng)
+# Batch Tool — Bảng điều khiển Google Pro Helper
 
-## I. Yêu cầu môi trường
+Batch Tool là ứng dụng web chạy cục bộ để quản lý danh sách tài khoản, cấu hình kết nối, tiến trình và nhật ký thực hiện.
 
-1. Hệ điều hành **Windows 10 / 11**.
-2. Đã cài đặt trình duyệt **Google Chrome** (có thể dùng đường dẫn cài đặt mặc định).
-3. Đã cài đặt **Python 3.10** trở lên (khi cài đặt, chọn **Add Python to PATH**).
-4. **Môi trường mạng:** Bật proxy khu vực Mỹ (US) trên máy hoặc điền mẫu proxy ở phía bên trái bảng điều khiển.
+> **Cảnh báo:** Chưa hoàn tất kiểm toán bảo mật. Không sử dụng tài khoản chính hoặc thông tin thẻ thật. Tuyên bố ưu đãi miễn phí hay thời hạn đăng ký trong ứng dụng là thông tin tham khảo, không phải cam kết của Google.
 
-## II. Khởi chạy nhanh
+## Yêu cầu hệ thống
 
-1. **Lần đầu sử dụng:** Nhấp đúp chạy `1_首次运行_安装依赖并启动.bat` (cài đặt thư viện phụ thuộc và khởi chạy).
-2. **Những lần sử dụng sau:** Nhấp đúp chạy `2_启动控制台.bat` (khởi chạy bảng điều khiển).
-3. Trình duyệt sẽ tự động mở bảng điều khiển tại: http://127.0.0.1:8765
+1. Windows 10 hoặc Windows 11.
+2. Google Chrome đã cài đặt.
+3. Python 3.10 trở lên, có trong PATH.
+4. Kết nối mạng thích hợp với dịch vụ bạn được phép truy cập.
 
-## III. Nhập thông tin thẻ thanh toán tùy chỉnh và hướng dẫn chạy tài khoản
+## Cách khởi chạy
 
-### 1. Nhập thẻ thanh toán (bắt buộc)
+1. Mở thư mục `batch/`.
+2. Lần đầu, chạy **`install-and-start.bat`** để cài thư viện phụ thuộc và mở ứng dụng.
+3. Các lần sau, chạy **`start-dashboard.bat`**.
+4. Truy cập **http://127.0.0.1:8765** nếu trình duyệt không tự mở.
 
-- Tại khu vực **“Cấu hình toàn cục và liên kết thẻ trực tiếp với địa chỉ miễn thuế”** ở phía bên trái giao diện web, nhập thông tin thẻ Visa hoặc Mastercard hỗ trợ thanh toán ngoại tệ của bạn:
-  - **Số thẻ:** 16 chữ số.
-  - **Ngày hết hạn:** Tháng / năm, ví dụ `08 / 29`.
-  - **Mã bảo mật:** CVC gồm 3 chữ số.
-  - **Họ tên chủ thẻ:** Viết bằng tiếng Anh.
-  - **Mã ZIP:** Mặc định điền sẵn `97201` (bang Oregon, Mỹ, được tác giả mô tả là khu vực miễn thuế); theo hướng dẫn gốc, không cần thay đổi.
-- Sau khi nhập, nhấn **“💾 Lưu cấu hình”**.
-- **Lưu ý theo tài liệu gốc:** Script được mô tả là có cơ chế bảo vệ nghiêm ngặt nhằm chỉ nhấn đăng ký khi cửa sổ thanh toán xác nhận số tiền `US$0.00`, với mục tiêu không bị trừ tiền trong suốt quá trình. Đây là tuyên bố của tác giả, không phải bảo đảm về giao dịch thực tế.
+Các lệnh cài thư viện trong script sử dụng Python hiện tại; **không có môi trường ảo riêng**. Nên chạy thử trong môi trường cách ly trước khi đưa vào sử dụng.
 
-### 2. Nhập hàng loạt tài khoản Google
+## Các khu vực trong giao diện
 
-- Trong khu vực **“Nhập danh sách tài khoản hàng loạt”** ở bên phải giao diện web, dán danh sách tài khoản (**mỗi dòng một tài khoản**). Chấp nhận một trong các định dạng:
-  - `email----mật khẩu----email khôi phục`
-  - `email----mật khẩu----email khôi phục----khóa bí mật 2FA`
-  - `email----mật khẩu----khóa bí mật 2FA`
-- Nhấn **“➕ Nhập danh sách tài khoản”**.
+- **Tổng quan:** số lượng tài khoản và tiến trình.
+- **Cấu hình chung:** lựa chọn cấu hình, phương thức thanh toán và proxy tùy chọn.
+- **Nhập tài khoản:** dán danh sách, mỗi tài khoản một dòng.
+- **Danh sách tác vụ:** chọn tài khoản, xem trạng thái và thao tác.
+- **Nhật ký:** theo dõi diễn biến hoặc lỗi.
 
-### 3. Bắt đầu thực thi tự động
+Định dạng danh sách tài khoản mà chương trình hiện hỗ trợ:
 
-- Nhấn **“▶ Thực thi”** ở bên phải từng tài khoản hoặc **“▶ Thực thi tự động hàng loạt”** ở phía trên.
-- Theo hướng dẫn gốc, script sẽ tự động thực hiện:
-  1. **Bước 1:** Đăng nhập vào Google và xác minh qua email khôi phục / 2FA.
-  2. **Bước 2:** Liên kết thẻ trực tiếp với địa chỉ miễn thuế và áp dụng lớp ưu đãi miễn phí 12 tháng đầu (`US$0.00`).
-  3. **Bước 3:** Cộng thêm lớp ưu đãi miễn phí 6 tháng thứ hai (`US$0.00` → 18 tháng).
-  4. **Bước 4:** Cộng thêm lớp ưu đãi miễn phí 6 tháng thứ ba (`US$0.00` → tối đa 24 tháng).
-  5. **Bước 5:** Tự động truy cập Google Play để hủy gia hạn tự động, giữ quyền lợi đến hết hạn hai năm theo mô tả và chụp ảnh màn hình để xác minh.
+```text
+email----password----recovery_email
+email----password----recovery_email----two_factor_secret
+email----password----two_factor_secret
+```
 
-## Thông tin từ tác giả gốc
+**Các trường chứa thông tin cực kỳ nhạy cảm.** Không đưa dữ liệu thật vào môi trường chưa được kiểm toán. Tránh lưu mật khẩu, khóa bí mật 2FA hoặc dữ liệu thẻ dưới dạng văn bản rõ.
 
-- **Trang cung cấp thẻ:** https://faka.cdkey.si
-- **Blog:** https://blog.caowo.de
-- **Nhóm Telegram:** `@Hello_Florence`
+## Nguyên tắc bảo mật và dữ liệu
+
+- Không commit `config*.json`, `.env`, thư mục phiên trình duyệt, nhật ký, ảnh chụp và dữ liệu cá nhân.
+- Mỗi tài khoản có thể dùng cấu hình trình duyệt riêng; điều đó **không tương đương** môi trường sandbox bảo mật.
+- Luôn kiểm tra số tiền, phí phát sinh, quốc gia/khu vực, thời điểm gia hạn và điều khoản chính thức trước khi chấp nhận đăng ký.
+- Chưa có kết quả kiểm thử thực tế nào bảo đảm rằng ứng dụng không bị tính phí hoặc có thể kích hoạt quyền lợi theo mô tả.
+
+## Phạm vi cập nhật ngôn ngữ
+
+Các nội dung hiển thị cho người dùng được chuẩn hóa bằng tiếng Việt; tên file và cấu trúc kỹ thuật bằng tiếng Anh. Các chuỗi dùng để tương tác với website Google phải được giữ đúng nội dung ban đầu nhằm tránh làm hỏng selector.

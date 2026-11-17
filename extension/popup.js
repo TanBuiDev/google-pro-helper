@@ -1,5 +1,5 @@
 /* popup.js */
-const LABELS = { off: "未启用", "12m": "12 个月", "6m_ss": "6 个月（SS）", "6m": "6 个月", "6m_2": "6 个月（备）" };
+const LABELS = { off: "Chưa bật", "12m": "12 tháng", "6m_ss": "6 tháng (SS)", "6m": "6 tháng", "6m_2": "6 tháng (dự phòng)" };
 const stateEl = document.getElementById("state");
 
 function paintState(st) {
@@ -7,8 +7,8 @@ function paintState(st) {
   const mounted = !!(st && st.mounted) && layer !== "off";
   stateEl.className = mounted ? "ok" : "warn";
   stateEl.textContent = mounted
-    ? "已挂载：" + (LABELS[layer] || layer) + " —— 可以点 Get discount 了"
-    : "当前页面未检测到注入（确认在 one.google.com/plans 页并刷新）";
+    ? "Đã bật: " + (LABELS[layer] || layer) + " — Có thể kiểm tra ưu đãi trên trang."
+    : "Chưa phát hiện công cụ trên trang. Mở one.google.com/plans rồi tải lại.";
 }
 
 function queryTab() {
@@ -29,7 +29,7 @@ chrome.storage.local.get(["gapt_layer"], (r) => {
     el.addEventListener("change", () => {
       if (!el.checked) return;
       chrome.storage.local.set({ gapt_layer: el.value }, () => {
-        // 热更新到当前标签页
+        // Apply configuration to the active tab.
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           const t = tabs && tabs[0];
           if (!t) return queryTab();
