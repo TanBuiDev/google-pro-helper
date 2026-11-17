@@ -100,6 +100,25 @@ class LocalSecurityTests(unittest.TestCase):
                 self.assertNotIn(secret, redacted)
         self.assertIn("[ĐÃ ẨN]", redacted)
 
+    def test_redacts_http_authorization_and_token_query_parameters(self):
+        config = {"accounts": [], "card": {}}
+        message = (
+            "https://example.invalid/path?access_token=private-access&code=one-time-code "
+            "Authorization: Bearer header-secret "
+        )
+        result = self.fn["redact_sensitive"](message, config)
+        self.assertNotIn("private-access", result)
+        self.assertNotIn("one-time-code", result)
+        self.assertNotIn("header-secret", result)
+        self.assertIn("https://example.invalid/path?", result)
+
+    def test_redacts_sensitive_http_header_lines(self):
+        config = {"accounts": [], "card": {}}
+        message = "X-Api-Key: key-private-value\nCookie: session=abc123"
+        result = self.fn["redact_sensitive"](message, config)
+        self.assertNotIn("key-private-value", result)
+        self.assertNotIn("abc123", result)
+
 
 if __name__ == "__main__":
     unittest.main()
