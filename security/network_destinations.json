@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "description": "Static host inventory, not a runtime allowlist. Dynamic URLs, proxies, redirects and package dependencies may connect elsewhere. Update only after manual review.",
+  "destinations": [
+    {
+      "host": "127.0.0.1",
+      "purpose": "Local console, proxy bridge and Chrome debugging"
+    },
+    {
+      "host": "accounts.google.com",
+      "purpose": "Google account authentication"
+    },
+    {
+      "host": "api.floppydata.net",
+      "purpose": "Optional third-party proxy API and balance"
+    },
+    {
+      "host": "geo.g-w.info",
+      "purpose": "Optional third-party proxy gateway"
+    },
+    {
+      "host": "ipinfo.io",
+      "purpose": "Third-party public IP location check"
+    },
+    {
+      "host": "ipwho.is",
+      "purpose": "Third-party public IP location check"
+    },
+    {
+      "host": "one.google.com",
+      "purpose": "Google One plan page"
+    },
+    {
+      "host": "play.google.com",
+      "purpose": "Google Play subscriptions and orders"
+    },
+    {
+      "host": "pypi.org",
+      "purpose": "Package installation from official PyPI"
+    },
+    {
+      "host": "tokenized.play.google.com",
+      "purpose": "Google Play checkout iframe host"
+    }
+  ]
+}
