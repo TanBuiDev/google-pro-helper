@@ -5,7 +5,12 @@ cd /d "%~dp0"
 echo ==============================================================
 echo   Đang kiểm tra và cài đặt thư viện Python...
 echo ==============================================================
-python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+python -m pip install --index-url https://pypi.org/simple -r requirements.txt
+if errorlevel 1 (
+  echo Khong the cai dat thu vien. Kiem tra ket noi va thu lai.
+  pause
+  exit /b 1
+)
 echo.
 echo ==============================================================
 echo   Đang mở bảng điều khiển (http://127.0.0.1:8765)...
