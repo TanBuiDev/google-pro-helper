@@ -14,6 +14,8 @@ from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import secure_storage
+
 from automation_engine import (
     GoogleUltraAutomator,
     LocalHttpProxyAuthBridge,
@@ -71,10 +73,18 @@ def load_config() -> Dict[str, Any]:
     if not os.path.exists(CONFIG_PATH):
         return {"target_region": "US", "target_plan": "pro_2year_zero", "auto_cancel": True, "card": {}, "accounts": []}
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+        stored = json.load(f)
+    config = secure_storage.decode_config(stored)
+    if not secure_storage.is_protected(stored):
+        # Migrate legacy plaintext automatically; an atomic encrypted replacement
+        # leaves the original file intact if DPAPI or the disk operation fails.
+        save_config(config)
+    return config
 
 
 def save_config(cfg: Dict[str, Any]):
+    # Protect all fields before creating any on-disk temporary file.
+    envelope = secure_storage.encode_config(cfg)
     temp_path = None
     try:
         # Write beside the target so replacement cannot expose a partial config.
@@ -83,7 +93,7 @@ def save_config(cfg: Dict[str, Any]):
             prefix=".config-", suffix=".tmp", delete=False,
         ) as f:
             temp_path = f.name
-            json.dump(cfg, f, ensure_ascii=False, indent=2)
+            json.dump(envelope, f, ensure_ascii=False, indent=2)
             f.flush()
             os.fsync(f.fileno())
         os.replace(temp_path, CONFIG_PATH)
