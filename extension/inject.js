@@ -21,8 +21,9 @@
     return {
       name: "gapt_" + layer,
       full_items: [
-        [[PREFIX + "g1.2tb.ai.subs_variant", 21], null, null, null, 1, [TOKENS[layer]]],
-        [[PREFIX + "g1.youtube_premium_individual_add_on", 21], null, null, null, 1, [YT_FREE_TOK]]
+        // EXPERIMENT ONLY: temporarily disable both offer items.
+        // [[PREFIX + "g1.2tb.ai.subs_variant", 21], null, null, null, 1, [TOKENS[layer]]],
+        // [[PREFIX + "g1.youtube_premium_individual_add_on", 21], null, null, null, 1, [YT_FREE_TOK]]
       ],
       ear8: null
     };
