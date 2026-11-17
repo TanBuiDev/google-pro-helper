@@ -133,6 +133,23 @@ def redact_sensitive(message: str, cfg: Optional[Dict[str, Any]] = None) -> str:
     value = re.sub(r"(?i)(https?://)[^/@\s]+:[^/@\s]+@", r"\1[ĐÃ ẨN]@", value)
     value = re.sub(r"(?i)(\b(?:CVC|CVV|security code|mã bảo mật)\s*[:=]\s*)\d{3,4}\b",
                    r"\1[ĐÃ ẨN]", value)
+    # Avoid leaking credentials embedded in common HTTP diagnostics.
+    value = re.sub(
+        r"(?i)(\bAuthorization\s*[:=]\s*(?:Bearer|Basic)\s+)[A-Za-z0-9._~+/\-=]+",
+        r"\1[ĐÃ ẨN]", value,
+    )
+    value = re.sub(
+        r"(?i)(\b(?:X-Api-Key|Proxy-Authorization|Cookie|Set-Cookie)\s*[:=]\s*)[^\r\n]+",
+        r"\1[ĐÃ ẨN]", value,
+    )
+    value = re.sub(
+        r"(?i)([?&](?:access_token|refresh_token|id_token|api_key|apikey|auth_token|client_secret|code|key)=)[^&#\s]+",
+        r"\1[ĐÃ ẨN]", value,
+    )
+    value = re.sub(
+        r"(?i)(\b(?:password|passwd|totp_secret|cvc|cvv|client_secret)\s*[:=]\s*)[^\s,;&#\r\n]+",
+        r"\1[ĐÃ ẨN]", value,
+    )
     return value
 
 
