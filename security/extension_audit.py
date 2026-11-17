@@ -66,7 +66,7 @@ def audit_extension(root=ROOT):
             problems.append("Chế độ world của " + name + " đã thay đổi.")
         if script.get("all_frames", False) != spec["frames"]:
             problems.append("Phạm vi iframe của " + name + " đã thay đổi.")
-    for name in EXPECTED_SCRIPTS:
+    for name in (*EXPECTED_SCRIPTS, "popup.js"):
         try:
             content = (ext / name).read_text(encoding="utf-8")
         except OSError:

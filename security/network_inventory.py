@@ -22,7 +22,7 @@ SOURCE_PATHS = (
 )
 BASELINE_PATH = ROOT / "security" / "network_destinations.json"
 URL_HOST = re.compile(r"\bhttps?://(?P<host>[a-z0-9.-]+)", re.IGNORECASE)
-PROXY_HOST = re.compile(r"@(?P<host>[a-z0-9.-]+\.[a-z]{2,})(?::\d+)?", re.IGNORECASE)
+PROXY_HOST = re.compile(r"@(?P<host>[a-z0-9.-]+\.[a-z]{2,}):\d{2,5}\b", re.IGNORECASE)
 LOCAL_ONLY = {"localhost", "127.0.0.1", "[::1]"}
 DOC_PLACEHOLDERS = {"user", "host", "example.com", "example.invalid"}
 
