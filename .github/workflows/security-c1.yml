@@ -1,0 +1,59 @@
+name: Phase C1 passive security
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/security-c1.yml"
+      - "security/**"
+      - "extension/**"
+      - "batch/app.py"
+      - "batch/automation_engine.py"
+      - "batch/requirements.txt"
+      - "batch/tests/test_security_controls.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: c1-passive-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  passive-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (full history for secret scanning)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Run read-only security regressions
+        run: |
+          python -m unittest discover -s security/tests -p "test_*.py" -v
+          python -m unittest discover -s batch/tests -p "test_security_controls.py" -v
+      - name: Audit Chrome Extension syntax and permissions
+        run: |
+          set -euo pipefail
+          for file in extension/*.js; do node --check "$file"; done
+          python security/extension_audit.py
+      - name: Compare static network hosts with approved inventory
+        run: python security/network_inventory.py --check
+      - name: Report possible legacy configuration copies (never delete)
+        run: python security/legacy_config_scan.py --root batch
+      - name: Audit direct and transitive Python dependencies for known CVEs
+        run: |
+          python -m pip install --disable-pip-version-check pip-audit
+          python -m pip_audit -r batch/requirements.txt
+      - name: Detect secrets in pull request history
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+          GITLEAKS_VERSION: "8.30.1"

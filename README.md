@@ -37,6 +37,10 @@ Mở `chrome://extensions/`, bật **Chế độ dành cho nhà phát triển**,
 - Giữ nguyên khóa cấu hình, API, selector và chuỗi nhận diện giao diện bên thứ ba khi Việt hóa.
 - Không commit thông tin tài khoản, mật khẩu, khóa 2FA, thông tin thanh toán, cookie, ảnh chụp hoặc log cá nhân.
 
+## Kiểm toán bảo mật thụ động (C1)
+
+Thư mục [security/](./security/) chứa các công cụ chỉ kiểm tra: danh sách domain, quyền Chrome Extension, cấu hình cũ, secret và lỗ hổng thư viện. Xem [hướng dẫn C1](./security/README.md). Không can thiệp đăng nhập hoặc thanh toán.
+
 ## Trạng thái an toàn
 
 Công cụ có khả năng truy cập dữ liệu đăng nhập và thanh toán. Các tính năng tự động hóa, phát hiện giá và trạng thái đăng ký **chưa được bảo đảm an toàn hoặc chính xác**. Chỉ sử dụng trong môi trường kiểm thử được kiểm soát.
