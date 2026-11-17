@@ -7,6 +7,8 @@ import argparse
 import json
 import os
 from pathlib import Path
+import shutil
+import tempfile
 import time
 
 import secure_storage
@@ -49,11 +51,48 @@ def find_old_screenshots(folder=SCREENSHOTS_DIR, *, keep=(), days=30, now=None):
     return sorted(candidates)
 
 
+def backup_encrypted_config(config_path=CONFIG_PATH):
+    """Create an atomic backup of an already encrypted, decryptable config."""
+    config_path = Path(config_path)
+    with config_path.open("r", encoding="utf-8") as src:
+        envelope = json.load(src)
+    if not secure_storage.is_protected(envelope):
+        raise secure_storage.StorageProtectionError(
+            "Please start the application to migrate plaintext config before backup."
+        )
+    secure_storage.decode_config(envelope)  # Fail closed on corrupt/foreign-user blobs.
+    destination = config_path.with_name(config_path.name + ".dpapi.bak")
+    temp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", dir=config_path.parent, prefix=".config-backup-",
+            suffix=".tmp", delete=False,
+        ) as tmp, config_path.open("rb") as src:
+            temp_path = tmp.name
+            shutil.copyfileobj(src, tmp)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.replace(temp_path, destination)
+    finally:
+        if temp_path is not None:
+            try:
+                os.unlink(temp_path)
+            except FileNotFoundError:
+                pass
+    return destination
+
+
 def main():
     parser = argparse.ArgumentParser(description="Dọn ảnh chụp cũ (mặc định chỉ xem trước)")
     parser.add_argument("--days", type=int, default=30, help="Số ngày giữ ảnh (mặc định 30)")
-    parser.add_argument("--apply", action="store_true", help="Thực hiện xóa sau khi xem trước")
+    actions = parser.add_mutually_exclusive_group()
+    actions.add_argument("--apply", action="store_true", help="Thực hiện xóa sau khi xem trước")
+    actions.add_argument("--backup-config", action="store_true", help="Sao lưu cấu hình đã mã hóa")
     args = parser.parse_args()
+    if args.backup_config:
+        backup_encrypted_config()
+        print("Đã tạo bản sao lưu DPAPI (cùng tài khoản Windows mới giải mã được).")
+        return
 
     # Fail closed when the config cannot be decrypted: never delete an active proof.
     keep = protected_names()
