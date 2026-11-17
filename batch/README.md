@@ -1,46 +1,51 @@
-========================================================================
-  Google AI Pro (5 TB) 零成本两年 (US$0.00 -> 24个月) 全自动控制台
-========================================================================
+# Google AI Pro (5 TB) — Bảng điều khiển tự động hóa với mục tiêu 2 năm không mất phí (US$0.00 → 24 tháng)
 
-【一、运行环境要求】
-1. Windows 10 / 11 系统
-2. 已安装 Google Chrome 浏览器（默认路径即可）
-3. 已安装 Python 3.10 或更高版本（安装时勾选 Add Python to PATH）
-4. 网络环境：本机开启美区（US）代理，或在控制台左侧填写代理模板
+## I. Yêu cầu môi trường
 
-【二、快速启动步骤】
-1. 首次使用请双击运行：【1_首次运行_安装依赖并启动.bat】
-2. 之后日常使用直接双击：【2_启动控制台.bat】
-3. 浏览器会自动打开控制台页面：http://127.0.0.1:8765
+1. Hệ điều hành **Windows 10 / 11**.
+2. Đã cài đặt trình duyệt **Google Chrome** (có thể dùng đường dẫn cài đặt mặc định).
+3. Đã cài đặt **Python 3.10** trở lên (khi cài đặt, chọn **Add Python to PATH**).
+4. **Môi trường mạng:** Bật proxy khu vực Mỹ (US) trên máy hoặc điền mẫu proxy ở phía bên trái bảng điều khiển.
 
-【三、自定义填写支付卡 & 跑号说明】
-1. 填写支付卡（必填）：
-   - 在网页左侧【全局配置与内联免税绑卡】区域，填入你自己的 Visa 或 Mastercard 外币卡：
-     * 卡号（16位数字）
-     * 有效期（月 / 年，如 08 / 29）
-     * 安全码（3位 CVC）
-     * 持卡人英文姓名
-     * 免税邮编默认已填好 97201（美国俄勒冈免税州），无需修改
-   - 填写后点击【💾 保存配置】。
-   - 注：脚本内置严格 0 元消费保护，仅在结账弹窗确认为 US$0.00 时才会点击订阅，全程 0 扣费。
+## II. Khởi chạy nhanh
 
-2. 批量导入 Google 账号：
-   - 在网页右侧【批量放号导入区】粘贴账号（每行一个），支持以下任意格式：
-     * 邮箱----密码----辅助邮箱
-     * 邮箱----密码----辅助邮箱----2FA密钥
-     * 邮箱----密码----2FA密钥
-   - 点击【➕ 一键导入账号列表】。
+1. **Lần đầu sử dụng:** Nhấp đúp chạy `1_首次运行_安装依赖并启动.bat` (cài đặt thư viện phụ thuộc và khởi chạy).
+2. **Những lần sử dụng sau:** Nhấp đúp chạy `2_启动控制台.bat` (khởi chạy bảng điều khiển).
+3. Trình duyệt sẽ tự động mở bảng điều khiển tại: http://127.0.0.1:8765
 
-3. 开始全自动执行：
-   - 点击单个账号右侧的【▶ 执行】或顶部的【▶ 批量全自动执行】。
-   - 脚本会自动完成：
-     Step 1: 自动登录 Google 并通过辅助邮箱 / 2FA 验证
-     Step 2: 内联免税绑卡 + 首层 12 个月免费包 (US$0.00)
-     Step 3: 叠加二层 6 个月免费包 (US$0.00 -> 18个月)
-     Step 4: 叠加三层 6 个月免费包 (US$0.00 -> 24个月封顶)
-     Step 5: 自动前往 Google Play 取消自动续订，锁死 2 年到期权益并截图验真
+## III. Nhập thông tin thẻ thanh toán tùy chỉnh và hướng dẫn chạy tài khoản
 
+### 1. Nhập thẻ thanh toán (bắt buộc)
 
-# 卡网：https://faka.cdkey.si
-# 博客：https://blog.caowo.de
-# TG群：@Hello_Florence
+- Tại khu vực **“Cấu hình toàn cục và liên kết thẻ trực tiếp với địa chỉ miễn thuế”** ở phía bên trái giao diện web, nhập thông tin thẻ Visa hoặc Mastercard hỗ trợ thanh toán ngoại tệ của bạn:
+  - **Số thẻ:** 16 chữ số.
+  - **Ngày hết hạn:** Tháng / năm, ví dụ `08 / 29`.
+  - **Mã bảo mật:** CVC gồm 3 chữ số.
+  - **Họ tên chủ thẻ:** Viết bằng tiếng Anh.
+  - **Mã ZIP:** Mặc định điền sẵn `97201` (bang Oregon, Mỹ, được tác giả mô tả là khu vực miễn thuế); theo hướng dẫn gốc, không cần thay đổi.
+- Sau khi nhập, nhấn **“💾 Lưu cấu hình”**.
+- **Lưu ý theo tài liệu gốc:** Script được mô tả là có cơ chế bảo vệ nghiêm ngặt nhằm chỉ nhấn đăng ký khi cửa sổ thanh toán xác nhận số tiền `US$0.00`, với mục tiêu không bị trừ tiền trong suốt quá trình. Đây là tuyên bố của tác giả, không phải bảo đảm về giao dịch thực tế.
+
+### 2. Nhập hàng loạt tài khoản Google
+
+- Trong khu vực **“Nhập danh sách tài khoản hàng loạt”** ở bên phải giao diện web, dán danh sách tài khoản (**mỗi dòng một tài khoản**). Chấp nhận một trong các định dạng:
+  - `email----mật khẩu----email khôi phục`
+  - `email----mật khẩu----email khôi phục----khóa bí mật 2FA`
+  - `email----mật khẩu----khóa bí mật 2FA`
+- Nhấn **“➕ Nhập danh sách tài khoản”**.
+
+### 3. Bắt đầu thực thi tự động
+
+- Nhấn **“▶ Thực thi”** ở bên phải từng tài khoản hoặc **“▶ Thực thi tự động hàng loạt”** ở phía trên.
+- Theo hướng dẫn gốc, script sẽ tự động thực hiện:
+  1. **Bước 1:** Đăng nhập vào Google và xác minh qua email khôi phục / 2FA.
+  2. **Bước 2:** Liên kết thẻ trực tiếp với địa chỉ miễn thuế và áp dụng lớp ưu đãi miễn phí 12 tháng đầu (`US$0.00`).
+  3. **Bước 3:** Cộng thêm lớp ưu đãi miễn phí 6 tháng thứ hai (`US$0.00` → 18 tháng).
+  4. **Bước 4:** Cộng thêm lớp ưu đãi miễn phí 6 tháng thứ ba (`US$0.00` → tối đa 24 tháng).
+  5. **Bước 5:** Tự động truy cập Google Play để hủy gia hạn tự động, giữ quyền lợi đến hết hạn hai năm theo mô tả và chụp ảnh màn hình để xác minh.
+
+## Thông tin từ tác giả gốc
+
+- **Trang cung cấp thẻ:** https://faka.cdkey.si
+- **Blog:** https://blog.caowo.de
+- **Nhóm Telegram:** `@Hello_Florence`
