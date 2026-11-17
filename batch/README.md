@@ -78,9 +78,10 @@ Từ thư mục `batch/`, chạy:
 ```powershell
 python maintenance.py --days 30
 python maintenance.py --days 30 --apply
+python maintenance.py --backup-config
 ```
 
-Lệnh đầu chỉ **xem trước** số ảnh có thể xóa; `--apply` mới thực hiện. Công cụ chỉ chọn ảnh PNG quá hạn không còn được tham chiếu trong cấu hình. Nó không đụng vào hồ sơ Chrome, ảnh đang được tham chiếu, hay file cấu hình. Nếu không đọc/giải mã được cấu hình, việc xóa phải dừng.
+Lệnh đầu chỉ **xem trước** số ảnh có thể xóa; `--apply` mới thực hiện. Công cụ chỉ chọn ảnh PNG quá hạn không còn được tham chiếu trong cấu hình. Nó không đụng vào hồ sơ Chrome, ảnh đang được tham chiếu, hay file cấu hình. Lệnh `--backup-config` tạo bản sao `config.json.dpapi.bak` **đã mã hóa**, chỉ khi cấu hình có thể giải mã bằng tài khoản Windows hiện tại. Đóng ứng dụng trước khi khôi phục bản sao này về tên `config.json`. Nếu không đọc/giải mã được cấu hình, việc xóa phải dừng.
 
 Vì mã hóa không xóa dấu vết dữ liệu đã từng lưu trên đĩa hoặc trong các bản sao trước đây, hãy kiểm tra và xử lý bản sao cũ theo quy trình bảo mật Windows. Không đưa bất kỳ bản sao nào lên GitHub.
 

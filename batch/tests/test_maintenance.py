@@ -39,6 +39,33 @@ class ScreenshotRetentionTests(unittest.TestCase):
         self.assertTrue(active.exists())
         self.assertTrue(old.exists())  # the candidate function never deletes
 
+    def test_backup_requires_protected_config(self):
+        config = self.folder / "config.json"
+        config.write_text('{"accounts":[]}', encoding="utf-8")
+        with self.assertRaises(self.module.secure_storage.StorageProtectionError):
+            self.module.backup_encrypted_config(config)
+        self.assertFalse((self.folder / "config.json.dpapi.bak").exists())
+
+    def test_backup_copies_only_encrypted_data(self):
+        from unittest import mock
+        storage = self.module.secure_storage
+        def fake(data, *, encrypt):
+            if encrypt:
+                return b"TEST:" + data[::-1]
+            if not data.startswith(b"TEST:"):
+                raise ValueError("invalid test blob")
+            return data[5:][::-1]
+        with mock.patch.object(storage, "_dpapi", side_effect=fake):
+            original = storage.encode_config({
+                "accounts": [{"password": "secret-password-for-test"}]
+            })
+            import json
+            config = self.folder / "config.json"
+            config.write_text(json.dumps(original), encoding="utf-8")
+            backup = self.module.backup_encrypted_config(config)
+            self.assertEqual(backup.read_bytes(), config.read_bytes())
+            self.assertNotIn(b"secret-password-for-test", backup.read_bytes())
+
     def test_invalid_retention_is_rejected(self):
         with self.assertRaises(ValueError):
             self.module.find_old_screenshots(self.folder, days=0)

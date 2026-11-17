@@ -1,0 +1,40 @@
+name: Phase B security checks
+
+on:
+  pull_request:
+    paths:
+      - "batch/**"
+      - ".github/workflows/phase-b-security.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-b-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-regressions:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: batch
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pinned Python packages
+        run: python -m pip install -r requirements.txt
+      - name: Verify DPAPI migration and atomic storage
+        run: python -m unittest discover -s tests -p "test_config_storage.py" -v
+      - name: Verify local API security controls
+        run: python -m unittest discover -s tests -p "test_security_controls.py" -v
+      - name: Verify safe screenshot retention
+        run: python -m unittest discover -s tests -p "test_maintenance.py" -v
+      - name: Verify frontend interaction in Chrome
+        run: python -m unittest discover -s tests -p "test_frontend_stability.py" -v
