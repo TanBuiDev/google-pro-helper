@@ -120,9 +120,9 @@ def redact_sensitive(message: str, cfg: Optional[Dict[str, Any]] = None) -> str:
     # Hide long, specific values first. Avoid masking unrelated short numbers.
     for secret in sorted({str(x) for x in secrets_to_hide if x and len(str(x)) >= 4}, key=len, reverse=True):
         value = value.replace(secret, "[ĐÃ ẨN]")
-    value = re.sub(r"(?i)(https?://)[^/@\\s]+:[^/@\\s]+@", r"\\1[ĐÃ ẨN]@", value)
-    value = re.sub(r"(?i)(\\b(?:CVC|CVV|security code|mã bảo mật)\\s*[:=]\\s*)\\d{3,4}\\b",
-                   r"\\1[ĐÃ ẨN]", value)
+    value = re.sub(r"(?i)(https?://)[^/@\s]+:[^/@\s]+@", r"\1[ĐÃ ẨN]@", value)
+    value = re.sub(r"(?i)(\b(?:CVC|CVV|security code|mã bảo mật)\s*[:=]\s*)\d{3,4}\b",
+                   r"\1[ĐÃ ẨN]", value)
     return value
 
 

@@ -523,7 +523,8 @@ class GoogleUltraAutomator:
         self.on_state(patch)
 
     async def save_screenshot(self, page, step_tag: str) -> str:
-        fname = f"{self.account['id']}_{step_tag}_{int(time.time())}.png"
+        safe_id = re.sub(r"[^A-Za-z0-9_-]", "_", str(self.account.get("id", "account")))[:60]
+        fname = f"{safe_id}_{step_tag}_{int(time.time())}.png
         fpath = os.path.join(SCREENSHOTS_DIR, fname)
         try:
             await page.screenshot(path=fpath)
@@ -1705,9 +1706,17 @@ class GoogleUltraAutomator:
         resolved_proxy = resolve_account_proxy(self.account, self.target_region, self.proxy_template)
         parsed_proxy = parse_proxy_string(resolved_proxy)
 
+        # Do not attach to or terminate another program's Chrome debugging port.
+        if is_port_open(self.port):
+            message = f"Cổng Chrome Debugging {self.port} đang được sử dụng. Hãy đóng phiên cũ rồi thử lại."
+            self.log(f"❌ {message}")
+            self.update_state(status="error", step_message=message)
+            return
+
         chrome_args = [
             CHROME_PATH,
             f"--remote-debugging-port={self.port}",
+            "--remote-debugging-address=127.0.0.1",
             f"--user-data-dir={user_data_dir}",
             "--no-first-run",
             "--no-default-browser-check",
@@ -1739,17 +1748,6 @@ class GoogleUltraAutomator:
             self.log(f"Đang khởi chạy môi trường Chrome riêng (cổng: {self.port}, chưa cấu hình proxy riêng; sử dụng kết nối hệ thống)...")
 
         chrome_args.append("about:blank")
-
-        # Cleanly kill any lingering process listening on self.port
-        try:
-            net_out = subprocess.check_output(f"netstat -ano | findstr :{self.port}", shell=True).decode("gbk", errors="ignore")
-            for line in net_out.splitlines():
-                if "LISTENING" in line:
-                    old_pid = line.strip().split()[-1]
-                    subprocess.run(f"taskkill /F /T /PID {old_pid}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except Exception:
-            pass
-        await asyncio.sleep(0.8)
 
         self.proc = subprocess.Popen(chrome_args)
         await asyncio.sleep(2.8)
