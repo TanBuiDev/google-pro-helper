@@ -38,6 +38,28 @@ email----password----two_factor_secret
 
 **Các trường chứa thông tin cực kỳ nhạy cảm.** Không đưa dữ liệu thật vào môi trường chưa được kiểm toán. Tránh lưu mật khẩu, khóa bí mật 2FA hoặc dữ liệu thẻ dưới dạng văn bản rõ.
 
+## Bảo vệ cục bộ — Giai đoạn A
+
+- Chỉ truy cập bảng điều khiển bằng `http://127.0.0.1:8765` hoặc `http://localhost:8765`.
+- API và ảnh chụp yêu cầu **mã phiên cục bộ tạm thời** được tạo mới mỗi lần khởi động ứng dụng. Nếu khởi động lại chương trình, hãy tải lại trang để nhận phiên mới.
+- Mật khẩu tài khoản được **ẩn mặc định** trong danh sách; nút **Hiện** cho phép xem khi cần. Lệnh sao chép thông tin tài khoản vẫn hoạt động theo yêu cầu người dùng.
+- Thông báo và trạng thái được lọc để giảm nguy cơ lộ mật khẩu, khóa 2FA, mã xác minh, số thẻ và thông tin xác thực proxy.
+- Nếu cổng Chrome Debugging đã bị chương trình khác sử dụng, tác vụ sẽ báo lỗi thay vì tự đóng tiến trình đang chiếm cổng.
+
+**Giới hạn:** Mã phiên cục bộ chủ yếu ngăn truy cập chéo từ website khác, không thay thế cơ chế bảo vệ hệ điều hành trước mã độc chạy cùng máy. Thông tin tài khoản và thẻ vẫn được lưu trong `config.json` chưa mã hóa; việc mã hóa thuộc giai đoạn tiếp theo. Kiểm tra bảo mật không đồng nghĩa bảo đảm không phát sinh chi phí hoặc bảo đảm quyền lợi đăng ký.
+
+### Chạy kiểm thử (không dùng tài khoản thật)
+
+Từ thư mục `batch/`:
+
+```powershell
+python -m unittest discover -s tests -p "test_security_controls.py"
+python -m unittest discover -s tests -p "test_config_storage.py"
+python -m unittest discover -s tests -p "test_frontend_stability.py"
+```
+
+Bài kiểm thử giao diện cần Playwright và Chrome. Các kiểm thử trên **chưa thay thế** cho việc quan sát lưu lượng mạng trong môi trường ảo cách ly.
+
 ## Nguyên tắc bảo mật và dữ liệu
 
 - Không commit `config*.json`, `.env`, thư mục phiên trình duyệt, nhật ký, ảnh chụp và dữ liệu cá nhân.

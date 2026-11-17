@@ -2,13 +2,15 @@ import asyncio
 import json
 import os
 import re
+import secrets
+import hmac
 import shutil
 import subprocess
 import tempfile
 import time
 from typing import Dict, Any, List, Optional
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -31,6 +33,30 @@ os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
 
 app = FastAPI(title="Bảng điều khiển Google Pro Helper")
 app.mount("/screenshots", StaticFiles(directory=SCREENSHOTS_DIR), name="screenshots")
+
+# A random per-process token protects the local API against cross-origin requests.
+# A separate local program running as the same user is not a trust boundary.
+LOCAL_ACCESS_TOKEN = secrets.token_urlsafe(32)
+ALLOWED_LOCAL_HOSTS = {"127.0.0.1:8765", "localhost:8765", "[::1]:8765"}
+ALLOWED_LOCAL_ORIGINS = {"http://" + host for host in ALLOWED_LOCAL_HOSTS}
+
+
+@app.middleware("http")
+async def protect_local_access(request: Request, call_next):
+    host = request.headers.get("host", "").lower()
+    origin = request.headers.get("origin")
+    if host not in ALLOWED_LOCAL_HOSTS or (origin and origin not in ALLOWED_LOCAL_ORIGINS):
+        return JSONResponse(status_code=403, content={"detail": "Truy cập bị từ chối."})
+    if request.url.path.startswith(("/api/", "/screenshots/")):
+        token = request.headers.get("x-gph-local-token", "")
+        if not hmac.compare_digest(token, LOCAL_ACCESS_TOKEN):
+            return JSONResponse(status_code=403, content={"detail": "Phiên cục bộ không hợp lệ. Vui lòng tải lại trang."})
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
 
 # Global runtime state
 LOGS: List[str] = [
@@ -69,9 +95,41 @@ def save_config(cfg: Dict[str, Any]):
                 pass
 
 
+def redact_sensitive(message: str, cfg: Optional[Dict[str, Any]] = None) -> str:
+    """Redact configured secrets before logging or saving error status."""
+    value = str(message)
+    if cfg is None:
+        try:
+            cfg = load_config()
+        except (OSError, ValueError):
+            cfg = {}
+    secrets_to_hide = []
+    for account in cfg.get("accounts", []):
+        secrets_to_hide.extend((account.get("password"), account.get("totp_secret")))
+        secret = account.get("totp_secret")
+        if secret:
+            try:
+                secrets_to_hide.append(get_totp(secret))
+            except Exception:
+                pass
+    card = cfg.get("card") or {}
+    secrets_to_hide.append(card.get("number"))
+    proxy = cfg.get("proxy_template") or ""
+    if "@" in proxy:
+        secrets_to_hide.append(proxy)
+    # Hide long, specific values first. Avoid masking unrelated short numbers.
+    for secret in sorted({str(x) for x in secrets_to_hide if x and len(str(x)) >= 4}, key=len, reverse=True):
+        value = value.replace(secret, "[ĐÃ ẨN]")
+    value = re.sub(r"(?i)(https?://)[^/@\s]+:[^/@\s]+@", r"\1[ĐÃ ẨN]@", value)
+    value = re.sub(r"(?i)(\b(?:CVC|CVV|security code|mã bảo mật)\s*[:=]\s*)\d{3,4}\b",
+                   r"\1[ĐÃ ẨN]", value)
+    return value
+
+
 def append_log(line: str):
-    print(line, flush=True)
-    LOGS.append(line)
+    safe_line = redact_sensitive(line)
+    print(safe_line, flush=True)
+    LOGS.append(safe_line)
     if len(LOGS) > 500:
         del LOGS[: len(LOGS) - 500]
 
@@ -106,7 +164,7 @@ class AccountActionReq(BaseModel):
 async def index():
     html_path = os.path.join(TEMPLATES_DIR, "index.html")
     with open(html_path, "r", encoding="utf-8") as f:
-        return f.read()
+        return f.read().replace("__GPH_LOCAL_TOKEN__", LOCAL_ACCESS_TOKEN)
 
 
 @app.get("/api/state")
@@ -334,6 +392,8 @@ async def _run_account_worker(account_id: str, start_step: int = 1, port: int = 
 
     def on_state_patch(patch: Dict[str, Any]):
         c = load_config()
+        if "step_message" in patch:
+            patch = {**patch, "step_message": redact_sensitive(patch["step_message"], c)}
         for acc_item in c.get("accounts", []):
             if acc_item["id"] == account_id:
                 acc_item.update(patch)

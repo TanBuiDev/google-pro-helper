@@ -140,6 +140,33 @@ class FrontendStabilityTests(unittest.TestCase):
         self.assertEqual(first.get_by_role("button", name="Trình duyệt", exact=True).count(), 1)
         self.assertEqual(first.locator("select").input_value(), "5")
 
+    def test_account_fields_never_execute_markup_or_inline_handlers(self):
+        payload = '<img src=x onerror="window.uiInjected = true">'
+        self.state["accounts"] = [
+            account("id'\\\";window.uiInjected=true;//", email=payload,
+                    password=payload, recovery_email=payload, ip_info=payload,
+                    step_message=payload, expiry_date=payload,
+                    last_screenshot=payload)
+        ]
+        self.refresh()
+        row = self.page.locator("#accountsTbody tr").first
+        self.assertEqual(row.locator(".account-email").inner_text(), payload)
+        self.assertEqual(row.locator(".step-msg").inner_text(), payload)
+        self.assertEqual(row.locator("img").count(), 0)
+        self.assertFalse(self.page.evaluate("Boolean(window.uiInjected)"))
+        self.assertIn("Hiện", row.inner_text())
+
+    def test_password_is_masked_by_default_and_revealed_only_on_click(self):
+        self.state["accounts"] = [account("first", password="my-private-password")]
+        self.refresh()
+        row = self.page.locator("#accountsTbody tr").first
+        self.assertNotIn("my-private-password", row.inner_text())
+        self.assertNotIn("my-private-password", row.inner_html())
+        row.get_by_role("button", name="Hiện", exact=True).click()
+        self.assertEqual(row.locator(".password-value").inner_text(), "my-private-password")
+        row.get_by_role("button", name="Ẩn", exact=True).click()
+        self.assertNotIn("my-private-password", row.inner_html())
+
     def test_log_styles_escaping_and_scroll_behavior_unchanged(self):
         self.state["logs"] = [f"Dòng nhật ký {index}" for index in range(100)]
         self.refresh()

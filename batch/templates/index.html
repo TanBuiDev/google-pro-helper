@@ -1731,6 +1731,47 @@
       <img id="modalImg" alt="Ảnh xác minh mới nhất của tài khoản" />
     </dialog>
     <script>
+      const GPH_LOCAL_TOKEN = "__GPH_LOCAL_TOKEN__";
+      function apiFetch(url, options = {}) {
+        const headers = new Headers(options.headers || {});
+        headers.set("X-GPH-Local-Token", GPH_LOCAL_TOKEN);
+        return fetch(url, { ...options, headers, credentials: "same-origin" });
+      }
+
+      let renderedAccountData = [];
+      const visiblePasswordIds = new Set();
+      let activeScreenshotUrl = null;
+      const rowAccount = (index) => renderedAccountData[index] || null;
+      function selectStartStepForRow(index, value) {
+        const acc = rowAccount(index);
+        if (acc) selectedStartSteps[acc.id] = parseInt(value, 10) || 1;
+      }
+      function togglePasswordForRow(index) {
+        const acc = rowAccount(index);
+        if (!acc) return;
+        const id = String(acc.id);
+        if (visiblePasswordIds.has(id)) visiblePasswordIds.delete(id);
+        else visiblePasswordIds.add(id);
+        renderAccounts(renderedAccountData);
+      }
+      function copyTotpForRow(index) {
+        const acc = rowAccount(index);
+        if (acc && acc.totp_now) copyText(String(acc.totp_now));
+      }
+      function copyAccountForRow(index) {
+        const acc = rowAccount(index);
+        if (acc) copyAccountFull(acc.id, acc.email, acc.password, acc.totp_secret || acc.recovery_email || "");
+      }
+      function showScreenshotForRow(index) {
+        const acc = rowAccount(index);
+        if (acc && acc.last_screenshot) showScreenshot(acc.id, acc.last_screenshot);
+      }
+      function runSingleForRow(index) { const acc = rowAccount(index); if (acc) return runSingle(acc.id); }
+      function stopSingleForRow(index) { const acc = rowAccount(index); if (acc) return stopSingle(acc.id); }
+      function openBrowserForRow(index) { const acc = rowAccount(index); if (acc) return openBrowser(acc.id); }
+      function resetAccountForRow(index) { const acc = rowAccount(index); if (acc) return resetAccount(acc.id); }
+      function deleteAccountForRow(index) { const acc = rowAccount(index); if (acc) return deleteAccount(acc.id); }
+
       let configInitialized = false;
       let selectedStartSteps = {};
       let copiedAccountMap = {};
@@ -1743,7 +1784,7 @@
       async function fetchState() {
         const requestSequence = ++stateRequestSequence;
         try {
-          const res = await fetch("/api/state");
+          const res = await apiFetch("/api/state");
           if (!res.ok) {
             throw new Error(`State request failed: ${res.status}`);
           }
@@ -1818,7 +1859,7 @@
           stopped: ["status-pending", "Đã dừng"],
         };
         const [cls, label] = map[status] || ["status-pending", status];
-        return `<span class="status-badge ${cls}">${label}</span>`;
+        return `<span class="status-badge ${cls}">${escapeHtml(label)}</span>`;
       }
 
       function stepDotsHtml(curStep, status) {
@@ -1838,42 +1879,46 @@
       }
 
       function renderAccounts(accounts) {
+        renderedAccountData = accounts;
         const tbody = document.getElementById("accountsTbody");
         const rows = accounts
-          .map((acc) => {
+          .map((acc, index) => {
             const savedStart = selectedStartSteps[acc.id] || 1;
+            const passwordVisible = visiblePasswordIds.has(String(acc.id));
+            const passwordDisplay = passwordVisible ? escapeHtml(acc.password) : "••••••••";
             const shotBtn = acc.last_screenshot
-              ? `<button class="btn-sm btn-secondary" onclick="showScreenshot('${acc.id}', '${acc.last_screenshot}')">Xem</button>`
+              ? `<button class="btn-sm btn-secondary" onclick="showScreenshotForRow(${index})">Xem</button>`
               : `<span style="color:var(--muted);font-size:12px;">-</span>`;
 
             const totpHtml =
               acc.totp_secret && acc.totp_now && acc.totp_now !== "------"
-                ? `<button type="button" class="totp-pill" onclick="copyText('${acc.totp_now}')" title="Nhấn để sao chép mã xác minh 6 chữ số">
-                 <span>${acc.totp_now}</span>
-                 <span class="totp-rem">${acc.totp_rem}s</span>
+                ? `<button type="button" class="totp-pill" onclick="copyTotpForRow(${index})" title="Nhấn để sao chép mã xác minh 6 chữ số">
+                 <span>${escapeHtml(acc.totp_now)}</span>
+                 <span class="totp-rem">${escapeHtml(acc.totp_rem)}s</span>
                </button>`
                 : `<span class="account-recovery">Email khôi phục</span>`;
 
             return `
             <tr>
-              <td><strong>${acc.id}</strong></td>
+              <td><strong>${escapeHtml(acc.id)}</strong></td>
               <td>
-                <div class="account-email">${acc.email}</div>
+                <div class="account-email">${escapeHtml(acc.email)}</div>
                 <div class="account-meta">
-                  Mật khẩu: ${acc.password}
-                  ${acc.recovery_email ? `<br/>Khôi phục: ${acc.recovery_email}` : ""}
-                  ${acc.ip_info ? `<span class="account-network">[${acc.ip_info}]</span>` : acc.proxy ? `<span class="account-network">[Proxy riêng]</span>` : ""}
+                  Mật khẩu: <span class="password-value">${passwordDisplay}</span>
+                  <button type="button" class="btn-sm btn-secondary" onclick="togglePasswordForRow(${index})">${passwordVisible ? "Ẩn" : "Hiện"}</button>
+                  ${acc.recovery_email ? `<br/>Khôi phục: ${escapeHtml(acc.recovery_email)}` : ""}
+                  ${acc.ip_info ? `<span class="account-network">[${escapeHtml(acc.ip_info)}]</span>` : acc.proxy ? `<span class="account-network">[Proxy riêng]</span>` : ""}
                 </div>
               </td>
               <td>${totpHtml}</td>
               <td>${statusBadgeHtml(acc.status)}</td>
               <td>
                 ${stepDotsHtml(acc.current_step || 0, acc.status)}
-                <div class="step-msg">${acc.step_message || ""}</div>
+                <div class="step-msg">${escapeHtml(acc.step_message || "")}</div>
               </td>
               <td>
                 <span class="expiry-date ${acc.status === "completed" ? "completed" : ""}">
-                  ${acc.expiry_date || "-"}
+                  ${escapeHtml(acc.expiry_date || "-")}
                 </span>
               </td>
               <td>${shotBtn}</td>
@@ -1881,7 +1926,7 @@
                 <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                   <select
                     style="padding:4px 6px; font-size:12px;"
-                    onchange="selectedStartSteps['${acc.id}'] = parseInt(this.value)"
+                    onchange="selectStartStepForRow(${index}, this.value)"
                   >
                     <option value="1" ${savedStart === 1 ? "selected" : ""}>Bắt đầu từ bước 1 · Toàn bộ</option>
                     <option value="2" ${savedStart === 2 ? "selected" : ""}>Bắt đầu từ bước 2 · 12 tháng ($0)</option>
@@ -1891,26 +1936,26 @@
                   </select>
                   <button
                     class="btn-sm ${acc.is_running ? "btn-danger" : "btn-success"}"
-                    onclick="${acc.is_running ? `stopSingle('${acc.id}')` : `runSingle('${acc.id}')`}"
+                    onclick="${acc.is_running ? `stopSingleForRow(${index})` : `runSingleForRow(${index})`}"
                   >
                     ${acc.is_running ? "Dừng" : "Bắt đầu"}
                   </button>
                   <button
                     class="btn-sm ${openedBrowserMap[acc.id] ? "btn-success" : "btn-secondary"}"
-                    onclick="openBrowser('${acc.id}')"
+                    onclick="openBrowserForRow(${index})"
                     title="Mở cửa sổ Chrome riêng cho tài khoản này"
                   >
                     ${openedBrowserMap[acc.id] ? "Đã mở" : "Trình duyệt"}
                   </button>
-                  <button class="btn-sm btn-secondary" onclick="resetAccount('${acc.id}')" title="Đặt lại trạng thái về chưa thực hiện">
+                  <button class="btn-sm btn-secondary" onclick="resetAccountForRow(${index})" title="Đặt lại trạng thái về chưa thực hiện">
                     Đặt lại
                   </button>
-                  <button class="btn-sm btn-secondary" onclick="deleteAccount('${acc.id}')" title="Xóa tài khoản này">
+                  <button class="btn-sm btn-secondary" onclick="deleteAccountForRow(${index})" title="Xóa tài khoản này">
                     Xóa
                   </button>
                   <button
                     class="btn-sm ${copiedAccountMap[acc.id] ? "btn-success" : "btn-secondary"}"
-                    onclick="copyAccountFull('${acc.id}', '${acc.email}', '${acc.password}', '${acc.totp_secret || acc.recovery_email || ""}')"
+                    onclick="copyAccountForRow(${index})"
                     title="Sao chép thông tin tài khoản"
                   >
                     ${copiedAccountMap[acc.id] ? "Đã sao chép" : "Sao chép"}
@@ -1970,10 +2015,12 @@
       }
 
       function escapeHtml(str) {
-        return str
+        return String(str ?? "")
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;");
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
       function onRegionChange(region) {
@@ -1992,7 +2039,7 @@
         try {
           const region = document.getElementById("cfgTargetRegion").value;
           const tpl = document.getElementById("cfgProxyTemplate").value.trim();
-          const res = await fetch("/api/proxy/test", {
+          const res = await apiFetch("/api/proxy/test", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -2044,7 +2091,7 @@
               document.getElementById("cfgProvince").value.trim() || "OR",
           },
         };
-        await fetch("/api/config", {
+        await apiFetch("/api/config", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -2055,7 +2102,7 @@
       async function importAccounts() {
         const raw = document.getElementById("importText").value.trim();
         if (!raw) return alert("Vui lòng dán thông tin tài khoản vào ô nhập trước!");
-        const res = await fetch("/api/accounts/import", {
+        const res = await apiFetch("/api/accounts/import", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ raw_text: raw }),
@@ -2089,7 +2136,7 @@
         const startStep = selectedStartSteps[accountId] || 1;
         if (!validateCardBeforeRun(startStep)) return;
         await saveConfig();
-        const res = await fetch("/api/run/single", {
+        const res = await apiFetch("/api/run/single", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -2110,7 +2157,7 @@
         );
         if (!validateCardBeforeRun(startStep)) return;
         await saveConfig();
-        const res = await fetch("/api/run/batch", {
+        const res = await apiFetch("/api/run/batch", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ start_step: startStep }),
@@ -2123,7 +2170,7 @@
       }
 
       async function stopSingle(accountId) {
-        await fetch("/api/stop", {
+        await apiFetch("/api/stop", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ account_id: accountId }),
@@ -2132,14 +2179,14 @@
       }
 
       async function stopAll() {
-        await fetch("/api/stop", { method: "POST" });
+        await apiFetch("/api/stop", { method: "POST" });
         fetchState();
       }
 
       async function openBrowser(accountId) {
         openedBrowserMap[accountId] = true;
         fetchState();
-        await fetch("/api/open_browser", {
+        await apiFetch("/api/open_browser", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ account_id: accountId }),
@@ -2151,7 +2198,7 @@
       }
 
       async function resetAccount(accountId) {
-        await fetch("/api/accounts/reset", {
+        await apiFetch("/api/accounts/reset", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ account_id: accountId }),
@@ -2161,7 +2208,7 @@
 
       async function deleteAccount(accountId) {
         if (!confirm(`Bạn có chắc muốn xóa tài khoản ${accountId} khỏi danh sách không?`)) return;
-        await fetch("/api/accounts/delete", {
+        await apiFetch("/api/accounts/delete", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ account_id: accountId }),
@@ -2169,16 +2216,28 @@
         fetchState();
       }
 
-      function showScreenshot(accId, filename) {
-        document.getElementById("modalTitle").textContent =
-          `${accId} Ảnh xác minh mới nhất (${filename})`;
-        document.getElementById("modalImg").src =
-          `/screenshots/${filename}?t=${Date.now()}`;
-        document.getElementById("imgModal").showModal();
+      async function showScreenshot(accId, filename) {
+        try {
+          const name = String(filename);
+          const response = await apiFetch(`/screenshots/${encodeURIComponent(name)}`);
+          if (!response.ok) throw new Error("Không thể tải ảnh xác minh");
+          const blob = await response.blob();
+          if (activeScreenshotUrl) URL.revokeObjectURL(activeScreenshotUrl);
+          activeScreenshotUrl = URL.createObjectURL(blob);
+          document.getElementById("modalTitle").textContent =
+            `${accId} Ảnh xác minh mới nhất (${name})`;
+          document.getElementById("modalImg").src = activeScreenshotUrl;
+          document.getElementById("imgModal").showModal();
+        } catch (error) {
+          alert("Không thể mở ảnh xác minh. Vui lòng thử lại.");
+        }
       }
 
       function closeModal() {
         document.getElementById("imgModal").close();
+        document.getElementById("modalImg").removeAttribute("src");
+        if (activeScreenshotUrl) URL.revokeObjectURL(activeScreenshotUrl);
+        activeScreenshotUrl = null;
       }
 
       function copyText(txt) {
