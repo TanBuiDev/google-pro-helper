@@ -132,12 +132,12 @@ class FrontendStabilityTests(unittest.TestCase):
         self.refresh()
         first = self.page.locator("#accountsTbody tr").first
         self.assertEqual(first.locator("select").input_value(), "5")
-        self.assertEqual(first.get_by_role("button", name="已复制", exact=True).count(), 1)
-        self.assertEqual(first.get_by_role("button", name="已打开", exact=True).count(), 1)
+        self.assertEqual(first.get_by_role("button", name="Đã sao chép", exact=True).count(), 1)
+        self.assertEqual(first.get_by_role("button", name="Đã mở", exact=True).count(), 1)
         self.page.evaluate("delete copiedAccountMap.first; delete openedBrowserMap.first;")
         self.refresh()
-        self.assertEqual(first.get_by_role("button", name="复制", exact=True).count(), 1)
-        self.assertEqual(first.get_by_role("button", name="浏览器", exact=True).count(), 1)
+        self.assertEqual(first.get_by_role("button", name="Sao chép", exact=True).count(), 1)
+        self.assertEqual(first.get_by_role("button", name="Trình duyệt", exact=True).count(), 1)
         self.assertEqual(first.locator("select").input_value(), "5")
 
     def test_log_styles_escaping_and_scroll_behavior_unchanged(self):
@@ -172,7 +172,7 @@ class FrontendStabilityTests(unittest.TestCase):
         self.begin_overlapping_requests()
         self.finish_request(1)
         self.finish_request(0, status=503)
-        self.assertIn("已连接", self.page.locator("#connectionStatus").inner_text())
+        self.assertIn("Đã kết nối", self.page.locator("#connectionStatus").inner_text())
 
     def test_older_response_can_display_while_newer_request_is_pending(self):
         self.begin_overlapping_requests()
@@ -188,10 +188,10 @@ class FrontendStabilityTests(unittest.TestCase):
         self.begin_overlapping_requests()
         self.finish_request(1, status=503)
         self.finish_request(0)
-        self.assertIn("连接中断", self.page.locator("#connectionStatus").inner_text())
+        self.assertIn("Mất kết nối", self.page.locator("#connectionStatus").inner_text())
         self.hold_requests = False
         self.refresh()
-        self.assertIn("已连接", self.page.locator("#connectionStatus").inner_text())
+        self.assertIn("Đã kết nối", self.page.locator("#connectionStatus").inner_text())
         self.assertEqual(self.page.locator("#cfgHolder").input_value(), "UNSAVED UI TEST")
         self.assertEqual(self.errors, [])
 

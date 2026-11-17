@@ -29,12 +29,12 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
 os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
 
-app = FastAPI(title="Google AI Pro (5 TB) 零成本两年全自动控制台")
+app = FastAPI(title="Bảng điều khiển Google Pro Helper")
 app.mount("/screenshots", StaticFiles(directory=SCREENSHOTS_DIR), name="screenshots")
 
 # Global runtime state
 LOGS: List[str] = [
-    f"[{time.strftime('%H:%M:%S')}] [SYSTEM] 🚀 Google AI Pro (5 TB) 零成本两年 (US$0.00 -> 2028-10) 全自动控制台已就绪！"
+    f"[{time.strftime('%H:%M:%S')}] [SYSTEM] 🚀 Google Pro Helper đã sẵn sàng."
 ]
 ACTIVE_TASKS: Dict[str, GoogleUltraAutomator] = {}
 BATCH_RUNNING: bool = False
@@ -146,7 +146,7 @@ async def update_config(req: ConfigUpdateReq):
     cfg["proxy_template"] = req.proxy_template.strip()
     cfg["card"] = req.card
     save_config(cfg)
-    append_log(f"[{time.strftime('%H:%M:%S')}] [CONFIG] ✅ 已保存配置 (目标地区: {req.target_region} | 代理模板: {'已启用' if req.proxy_template.strip() else '系统默认'})")
+    append_log(f"[{time.strftime('%H:%M:%S')}] [CONFIG] ✅ Đã lưu cấu hình (Khu vực: {req.target_region} | Mẫu proxy: {'Đã bật' if req.proxy_template.strip() else 'Mặc định hệ thống'})")
     return {"ok": True}
 
 
@@ -162,7 +162,7 @@ async def test_proxy(req: ProxyTestReq):
     region = (req.target_region or cfg.get("target_region") or "TR").upper()
     resolved = resolve_account_proxy({"id": f"probe{int(time.time())%1000}", "email": "probe@gmail.com"}, region, tpl)
     if not resolved:
-        return {"ok": False, "message": "未填写代理模板"}
+        return {"ok": False, "message": "Chưa nhập mẫu proxy"}
 
     def _sync_probe():
         import urllib.request
@@ -191,12 +191,12 @@ async def test_proxy(req: ProxyTestReq):
         city = data.get("city", "")
         org = data.get("connection", {}).get("org", "")
         flag = "🇧🇴" if cc == "BO" else ("🇹🇷" if cc == "TR" else "🌐")
-        bal_str = f" | FloppyData 剩余流量: {bal_gb} GB" if bal_gb is not None else ""
-        msg = f"{flag} 连通成功！出口 IP: {ip} ({country} · {city} | {org}){bal_str}"
+        bal_str = f" | FloppyData Dung lượng còn lại: {bal_gb} GB" if bal_gb is not None else ""
+        msg = f"{flag} Kết nối thành công! IP đầu ra: {ip} ({country} · {city} | {org}){bal_str}"
         append_log(f"[{time.strftime('%H:%M:%S')}] [PROXY] ✅ {msg}")
         return {"ok": True, "message": msg, "ip": ip, "country_code": cc, "balance_gb": bal_gb}
     except Exception as e:
-        err = f"代理测试失败: {e}"
+        err = f"Kiểm tra proxy thất bại: {e}"
         append_log(f"[{time.strftime('%H:%M:%S')}] [PROXY] ❌ {err}")
         return {"ok": False, "message": err}
 
@@ -280,7 +280,7 @@ async def import_accounts(req: ImportAccountsReq):
                 "ip_info": "",
                 "status": "pending",
                 "current_step": 0,
-                "step_message": "新导入账号（待执行）",
+                "step_message": "Tài khoản mới nhập (chưa thực hiện)",
                 "expiry_date": "-",
                 "last_screenshot": "",
             }
@@ -290,18 +290,18 @@ async def import_accounts(req: ImportAccountsReq):
 
     cfg["accounts"] = existing
     save_config(cfg)
-    append_log(f"[{time.strftime('%H:%M:%S')}] [IMPORT] ✅ 成功导入/更新 {added} 个账号（当前共 {len(existing)} 个账号）")
+    append_log(f"[{time.strftime('%H:%M:%S')}] [IMPORT] ✅ Đã nhập/cập nhật {added} tài khoản (hiện có tổng cộng {len(existing)} tài khoản)")
     return {"ok": True, "added": added, "total": len(existing)}
 
 
 @app.post("/api/accounts/delete")
 async def delete_account(req: AccountActionReq):
     if req.account_id in ACTIVE_TASKS:
-        raise HTTPException(status_code=400, detail="该账号正在运行中，请先停止任务")
+        raise HTTPException(status_code=400, detail="Tài khoản đang thực hiện tác vụ. Hãy dừng tác vụ trước.")
     cfg = load_config()
     cfg["accounts"] = [a for a in cfg.get("accounts", []) if a["id"] != req.account_id]
     save_config(cfg)
-    append_log(f"[{time.strftime('%H:%M:%S')}] [ACCOUNT] 🗑️ 已移除账号 {req.account_id}")
+    append_log(f"[{time.strftime('%H:%M:%S')}] [ACCOUNT] 🗑️ Đã xóa tài khoản {req.account_id}")
     return {"ok": True}
 
 
@@ -312,10 +312,10 @@ async def reset_account(req: AccountActionReq):
         if a["id"] == req.account_id:
             a["status"] = "pending"
             a["current_step"] = 0
-            a["step_message"] = "已重置状态（待执行）"
+            a["step_message"] = "Đã đặt lại trạng thái (chưa thực hiện)"
             break
     save_config(cfg)
-    append_log(f"[{time.strftime('%H:%M:%S')}] [ACCOUNT] 🔄 已重置账号 {req.account_id} 状态为待执行")
+    append_log(f"[{time.strftime('%H:%M:%S')}] [ACCOUNT] 🔄 Đã đặt lại tài khoản {req.account_id} về trạng thái chưa thực hiện")
     return {"ok": True}
 
 
@@ -361,7 +361,7 @@ async def _run_account_worker(account_id: str, start_step: int = 1, port: int = 
 @app.post("/api/run/single")
 async def run_single(req: RunSingleReq):
     if req.account_id in ACTIVE_TASKS:
-        raise HTTPException(status_code=400, detail="该账号已经在运行中")
+        raise HTTPException(status_code=400, detail="Tài khoản này đang chạy")
     port = 9320 + (len(ACTIVE_TASKS) % 10)
     asyncio.create_task(_run_account_worker(req.account_id, start_step=req.start_step, port=port))
     return {"ok": True}
@@ -371,7 +371,7 @@ async def run_single(req: RunSingleReq):
 async def run_batch(req: RunBatchReq):
     global BATCH_RUNNING, STOP_BATCH
     if BATCH_RUNNING:
-        raise HTTPException(status_code=400, detail="批量队列已经在运行中")
+        raise HTTPException(status_code=400, detail="Danh sách xử lý hàng loạt đang chạy")
 
     cfg = load_config()
     if req.account_ids:
@@ -380,23 +380,23 @@ async def run_batch(req: RunBatchReq):
         queue_ids = [a["id"] for a in cfg.get("accounts", []) if a.get("status") != "completed"]
 
     if not queue_ids:
-        raise HTTPException(status_code=400, detail="没有待执行的账号（已完成的账号如需重跑请先点重置）")
+        raise HTTPException(status_code=400, detail="Không có tài khoản đang chờ thực hiện (đặt lại trạng thái nếu muốn chạy lại tài khoản đã hoàn tất)")
 
     async def _batch_runner():
         global BATCH_RUNNING, STOP_BATCH
         BATCH_RUNNING = True
         STOP_BATCH = False
-        append_log(f"[{time.strftime('%H:%M:%S')}] [BATCH] 🚀 开始批量一条龙执行队列: {queue_ids} (起始步骤: Step {req.start_step})")
+        append_log(f"[{time.strftime('%H:%M:%S')}] [BATCH] 🚀 Bắt đầu danh sách thực hiện hàng loạt: {queue_ids} (Bước bắt đầu: Step {req.start_step})")
         try:
             for idx, aid in enumerate(queue_ids):
                 if STOP_BATCH:
-                    append_log(f"[{time.strftime('%H:%M:%S')}] [BATCH] ⏹ 批量队列已按用户要求停止")
+                    append_log(f"[{time.strftime('%H:%M:%S')}] [BATCH] ⏹ Đã dừng danh sách tác vụ theo yêu cầu")
                     break
                 await _run_account_worker(aid, start_step=req.start_step, port=9330 + (idx % 5))
                 await asyncio.sleep(2)
         finally:
             BATCH_RUNNING = False
-            append_log(f"[{time.strftime('%H:%M:%S')}] [BATCH] 🏁 批量执行队列已结束")
+            append_log(f"[{time.strftime('%H:%M:%S')}] [BATCH] 🏁 Đã kết thúc danh sách tác vụ hàng loạt")
 
     asyncio.create_task(_batch_runner())
     return {"ok": True, "queued": queue_ids}
@@ -408,11 +408,11 @@ async def stop_all(req: Optional[AccountActionReq] = None):
     STOP_BATCH = True
     if req and req.account_id and req.account_id in ACTIVE_TASKS:
         ACTIVE_TASKS[req.account_id].stop_requested = True
-        append_log(f"[{time.strftime('%H:%M:%S')}] [STOP] ⏹ 正在停止账号 {req.account_id}...")
+        append_log(f"[{time.strftime('%H:%M:%S')}] [STOP] ⏹ Đang dừng tài khoản {req.account_id}...")
     else:
         for aid, task in list(ACTIVE_TASKS.items()):
             task.stop_requested = True
-        append_log(f"[{time.strftime('%H:%M:%S')}] [STOP] ⏹ 已发送全局停止指令")
+        append_log(f"[{time.strftime('%H:%M:%S')}] [STOP] ⏹ Đã gửi yêu cầu dừng tất cả")
     return {"ok": True}
 
 
@@ -493,7 +493,7 @@ async def open_browser_manual(req: AccountActionReq):
     cfg = load_config()
     target_acc = next((a for a in cfg.get("accounts", []) if a["id"] == req.account_id), None)
     if not target_acc:
-        raise HTTPException(status_code=404, detail="账号不存在")
+        raise HTTPException(status_code=404, detail="Không tìm thấy tài khoản")
 
     user_data_dir = get_profile_dir(target_acc["id"], target_acc["email"])
     target_region = cfg.get("target_region", "US")
@@ -537,7 +537,7 @@ async def open_browser_manual(req: AccountActionReq):
     )
     _launch_on_interactive_desktop(chrome_args)
     append_log(
-        f"[{time.strftime('%H:%M:%S')}] [BROWSER] 🌐 已为您手动打开 [{target_acc['id']}] ({target_acc['email']}) 的专属 Chrome 窗口"
+        f"[{time.strftime('%H:%M:%S')}] [BROWSER] 🌐 Đã mở thủ công [{target_acc['id']}] ({target_acc['email']}) cửa sổ Chrome riêng"
     )
     return {"ok": True}
 
